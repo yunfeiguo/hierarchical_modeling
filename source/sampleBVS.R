@@ -5,25 +5,40 @@ sampleBVS = function(data,forced=NULL,inform=FALSE,cov=NULL,rare=FALSE,mult.regi
    
     	
 	##Set up sampled model matrix 
+	#number of predictors
 	M = dim(data)[2]-1
+	#number of predictor-level covariates
 	c = dim(cov)[2]
+	#(supposed to be) number of predictors
 	r = dim(cov)[1]
-	if(length(cov)==0){
+	if(length(cov)==0)
+	{
 		c=1
-		r=M}
-	if(rare==FALSE){
-		which.ind = 1:M} 
-	if(rare==TRUE & mult.regions==FALSE){
-	    which.ind = 1}
-	if(rare==TRUE & mult.regions==TRUE){
+		r=M
+	}
+	if(rare==FALSE)
+	{
+		which.ind = 1:M
+	} 
+	if(rare==TRUE & mult.regions==FALSE)
+	{
+	    which.ind = 1
+	}
+	if(rare==TRUE & mult.regions==TRUE)
+	{
 		regions = as.factor(regions)
-		which.ind = 1:length(levels(regions))}
+		which.ind = 1:length(levels(regions))
+	}
+	#number of coef is which.ind, number of alpha is c, number of fitness is 1, number of logPrM is 1
 	which = matrix(NA,nrow=iter+1,ncol=length(which.ind)+2+c)
 	which.char = NULL
-	if(c>0){
-	  colnames(which) = c(paste("Coef.",which.ind,sep=""),paste("Alpha",1:c,sep=""),"Fitness","logPrM")}
+	if(c>0)
+	{
+	  colnames(which) = c(paste("Coef.",which.ind,sep=""),paste("Alpha",1:c,sep=""),"Fitness","logPrM")
+	}
 	old.iter=0
-	if(length(old.results)>0){
+	if(length(old.results)>0)
+	{
 		old.iter = length(old.results$fitness) 
 		which.char = c(which.char,old.results$which)
 		which[1:old.iter,] = cbind(old.results$coef,old.results$alpha,old.results$fitness,old.results$logPrM)
@@ -34,47 +49,71 @@ sampleBVS = function(data,forced=NULL,inform=FALSE,cov=NULL,rare=FALSE,mult.regi
 	##Initialize parameters
 	a0 = qnorm((1-2^(-1/r)))
 	##If old results are not present initialize randomly
-	if(old.iter==0){
+	if(old.iter==0)
+	{
+	    #this is a place we can improve
+	    #randomly selecting some variables obviously is not an ideal starting point
 	  Z.current = rep(0,M)
 	  Z.current[sample(1:M,5)]=1
-	  a1.current = rep(0,c)}
+	  #also, a1=0 is not necessarily a good starting point, either
+	  a1.current = rep(0,c)
+	}
 	##If old results are present use the last model sampled
-	if(old.iter>0){
-	  Z.current= as.numeric(unlist(strsplit(old.results$which[old.iter],split="")))
-	  if(is.matrix(old.results$alpha)==TRUE){
-	    a1.current = old.results$alpha[old.iter,]}
-	  if(is.matrix(old.results$alpha)==FALSE){
-	  	a1.current = old.results$alpha[old.iter]}}
+	if(old.iter>0)
+	{
+	    Z.current= as.numeric(unlist(strsplit(old.results$which[old.iter],split="")))
+	    if(is.matrix(old.results$alpha)==TRUE)
+	    {
+		a1.current = old.results$alpha[old.iter,]
+	    }
+	    if(is.matrix(old.results$alpha)==FALSE)
+	    {
+		a1.current = old.results$alpha[old.iter]
+	    }
+	}
 	  	
 	##Calculate current fitness of initial parameters  
 	lower.bound = rep(0,r)
 	upper.bound = rep(Inf,r)
     lower.bound[Z.current==0] = -Inf
     upper.bound[Z.current==0] = 0
+    #rtnorm denotes truncated normal distribution
 	t.current = rtnorm(r,lower=lower.bound,upper=upper.bound)
 	fit.current = fitBVS(Z.current,data=data,forced=forced,cov=cov,a1=a1.current,rare=rare,mult.regions=mult.regions,regions=regions,
 	                     hap=hap,inform=inform,which=which,which.char=which.char)
-	if(old.iter==0){                     
+	if(old.iter==0)
+	{                     
 	   which.char = cbind(which.char,paste(Z.current,collapse=""))
-	   which[1,] = c(fit.current[which.ind],a1.current,fit.current[-which.ind][1:2])}
+	   which[1,] = c(fit.current[which.ind],a1.current,fit.current[-which.ind][1:2])
+	}
 	
 	
 	
 		
 	##Run mutation for iter
 	run.ind = 1:iter
-	if(old.iter>0){
-		run.ind = old.iter:iter}
-	for(i in run.ind){
-		if(length(status.file)>0){
-		   cat("Processing iter",i,"\n",file=status.file,append=TRUE)}
-		if(length(status.file)==0){
-		   cat("Processing iter",i,"\n")}   
+	if(old.iter>0)
+	{
+		run.ind = old.iter:iter
+	}
+	#this is a loop, if we can make it become a vector computation, it'll be much faster
+	for(i in run.ind)
+	{
+		if(length(status.file)>0)
+		{
+		   cat("Processing iter",i,"\n",file=status.file,append=TRUE)
+		}
+		if(length(status.file)==0)
+		{
+		   cat("Processing iter",i,"\n")
+		}   
 		   
 		
 		##Sample new a1 if we are using the informative prior.  If not keep a1=0
-		if(inform==TRUE){
+		if(inform==TRUE)
+		{
 		  ##Sample a1 | current model and current t
+		    #solve(a) will return inverse of a
 	      V.hat = solve(diag(1,c,c)+t(cov)%*%cov)
 	      alpha.hat = V.hat%*%(t(cov)%*%(t.current-a0))
 	      a1.current = mvrnorm(1,mu=alpha.hat,Sigma=V.hat)
@@ -95,7 +134,8 @@ sampleBVS = function(data,forced=NULL,inform=FALSE,cov=NULL,rare=FALSE,mult.regi
 	        lprob.ninc = pnorm(0,mean=eta,lower.tail=TRUE,log.p=TRUE)
 	        logPrM = t(Z.current)%*%lprob.inc + t(1-Z.current)%*%lprob.ninc
 	      fit.current[-which.ind][1] = ll - logPrM
-	      fit.current[-which.ind][2] = logPrM}
+	      fit.current[-which.ind][2] = logPrM
+		}
 	    
 	      ##Sample Model
 	      model.type=0:1
@@ -127,7 +167,8 @@ sampleBVS = function(data,forced=NULL,inform=FALSE,cov=NULL,rare=FALSE,mult.regi
 	                       which.char,which[is.na(which[,1])==FALSE,(which.ind)],which[is.na(which[,1])==FALSE,(length(which.ind)+1):(length(which.ind)+c)])
 	        names(results) = c("fitness","logPrM","which","coef","alpha")
 	        save(results,file=outfile)
-			}}
+			}
+	}
 	
 	##Return final results		
 	which = which[is.na(which[,1])==FALSE,]
