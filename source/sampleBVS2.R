@@ -1,4 +1,4 @@
-sampleBVS = function(data,forced=NULL,inform=FALSE,cov=NULL,rare=FALSE,mult.regions=FALSE,regions=NULL,hap=FALSE,
+sampleBVS2 = function(data,forced=NULL,inform=FALSE,cov=NULL,rare=FALSE,mult.regions=FALSE,regions=NULL,hap=FALSE,
 		     iter=10000,save.iter=0,outfile=NULL,status.file=NULL,old.results=NULL)
 {
     library(MASS)

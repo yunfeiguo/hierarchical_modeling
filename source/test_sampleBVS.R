@@ -1,0 +1,6 @@
+require('BVS')
+library('microbenchmark')
+source('sampleBVS2.R')
+data(RareData)
+compare <- microbenchmark(sampleBVS(data=RareData,iter=100,rare=TRUE,status.file="/tmp/status.txt"),sampleBVS2(data=RareData,iter=100,rare=TRUE,status.file="/tmp/status2.txt"),times=10)
+print(compare)
