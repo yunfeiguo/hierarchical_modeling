@@ -1,0 +1,37 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+use Benchmark qw(:all);
+use File::Spec;
+use XML::Simple;
+
+###########################GLOBAL###########################
+my $TMP="/tmp";
+my $PIMSA_TEMPLATE="pimsa.xml";
+#############################MAIN###########################
+my $count=100;
+timethese($count,{
+	'sampleBVS'	=>	\&sampleBVS,
+	'sampleBVS2'	=>	\&sampleBVS2,
+});
+##############################SUBROUTINES###############################
+sub sampleBVS
+{
+	my $pheno=;
+	my $geno=;
+	my $source=File::Spec->catfile($TMP,rand($$).".sampleBVS.rscript.tmp");
+
+	&run_r_script($source);
+}
+sub sampleBVS
+{
+	my $source=File::Spec->catfile($TMP,rand($$).".sampleBVS2.rscript.tmp");
+
+	&run_r_script($source);
+}
+sub run_r_script
+{
+	my $source=shift;
+	!system("Rscript --vanilla $source") or die "Failed to run $source: $!\n";
+}

@@ -1,0 +1,17 @@
+# of simulations: 1000
+# of cases: 500
+# of controls: 500
+# of variants: 10000
+proportion of very common variants:
+proportion of common variants:
+proportion of rare variants:
+# of annotations: 2 (enhancer & promoter)
+# of group info: 10 (genes)
+# of very common risk variants: 1
+# of common risk variants: 2
+# of rare variants: 10
+LOD of very common variants: 1.05
+LOD of common variants: 1.2
+LOD of rare variants: 20
+independce of subjects: yes
+independce of variants (no LD): yes

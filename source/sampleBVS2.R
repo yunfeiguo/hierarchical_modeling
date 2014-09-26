@@ -1,5 +1,5 @@
 sampleBVS2 = function(data,forced=NULL,inform=FALSE,cov=NULL,rare=FALSE,mult.regions=FALSE,regions=NULL,hap=FALSE,
-		     iter=10000,save.iter=0,outfile=NULL,status.file=NULL,old.results=NULL)
+		     iter=10000,conver.thres=NULL,conver.count=1000,save.iter=0,outfile=NULL,status.file=NULL,old.results=NULL)
 {
     library(MASS)
     library(msm)
@@ -12,6 +12,8 @@ sampleBVS2 = function(data,forced=NULL,inform=FALSE,cov=NULL,rare=FALSE,mult.reg
     c = dim(cov)[2]
     #(supposed to be) number of predictors
     r = dim(cov)[1]
+    #set up count for convergence determination
+    conver.count=min(conver.count,iter);
     if(length(cov)==0)
     {
 	c=1
@@ -91,6 +93,8 @@ sampleBVS2 = function(data,forced=NULL,inform=FALSE,cov=NULL,rare=FALSE,mult.reg
 
 
 
+    #set up convergence counter
+    conver.counter=0;
     ##Run mutation for iter
     run.ind = 1:iter
     if(old.iter>0)
@@ -160,6 +164,20 @@ sampleBVS2 = function(data,forced=NULL,inform=FALSE,cov=NULL,rare=FALSE,mult.reg
 		)^(-1)
 		)
 	rand = runif(1)
+	#if conver.thres is set, we stop iteration if fitness 
+	#doesn't change beyond threshold(in proportion) for conver.count times in a row
+	if(length(conver.thres)>0)
+	{
+	    individual.fit.current <- fit.current[length(which.ind)+1]
+	    individual.fit.new <- fit.new[length(which.ind)+1]
+	    if( abs(1-individual.fit.current/individual.fit.new)<=conver.thres)
+	    {#increment coutner by 1
+		conver.counter = conver.counter + 1
+	    } else
+	    { #reset counter
+		conver.counter = 0
+	    }
+	}
 	##If rand is less than or equal to a accept the new model and replace Z.current and fit.current
 	if(rand<=a)
 	{
@@ -181,6 +199,19 @@ sampleBVS2 = function(data,forced=NULL,inform=FALSE,cov=NULL,rare=FALSE,mult.reg
 			   which.char,which[is.na(which[,1])==FALSE,(which.ind)],which[is.na(which[,1])==FALSE,(length(which.ind)+1):(length(which.ind)+c)])
 	    names(results) = c("fitness","logPrM","which","coef","alpha")
 	    save(results,file=outfile)
+	}
+
+	if(conver.counter > conver.count)
+	{
+	    if(length(status.file)>0)
+	    {
+		cat("Convergence threshold (",conver.thres,") reached",conver.counter,"times, stop iteration ...\nSet conver.thres to NULL to disable this feature\n",file=status.file,append=TRUE)
+	    }
+	    if(length(status.file)==0)
+	    {
+		cat("Convergence threshold (",conver.thres,") reached",conver.counter,"times, stop iteration ...\nSet conver.thres to NULL to disable this feature\n")
+	    }   
+	    break
 	}
     }
 
