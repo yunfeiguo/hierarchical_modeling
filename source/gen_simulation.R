@@ -129,31 +129,35 @@ invlogit = function (x)
 #beta0: constant in regression model
 gen_riskvar_genotype = function (nm,n,case=FALSE,or,maf,beta0=0)
 {
-    or=rep(or,nm)[1:nm]
-    case=rep(case,nm)[1:nm]
-    case[which(case)]=1
-    case[case!=1]=-1
-    maf=rep(maf,nm)[1:maf]
+    #convert OR to logOR
+    lor = rep(log(or),nm)[1:nm]
+    beta0 = rep(beta0,nm)[1:nm]
+    maf = rep(maf,nm)[1:nm]
+    if(!case)
+    {
+	lor = -lor
+	beta0 = -beta0
+    }
 
-    #sum(P(case|variant)P(variant))
-    p1.sum = sum(sapply(1:nm,function(i){invlogit(c(beta0,or[i])*c(1,1))*maf[i]}))
-    p2.sum = sum(sapply(1:nm,function(i){invlogit(c(beta0,or[i])*c(1,2))*maf[i]}))
-    p0.sum = sum(sapply(1:nm,function(i){invlogit(c(beta0,or[i])*c(1,0))*maf[i]}))
+    #each variant of each subject is independent from another
     return(
-	   sapply(1:nm,function(i)
-		  {
-		      result = rep(NA,n)
-		      !!!!!
-		      #probability of disease when having 1 risk allele
-		      p1 = invlogit(sum(c(beta0,or)*c(1,rep(1,nm))))
-		      #probability of disease when having 2 risk alleles
-		      p2 = invlogit(sum(c(beta0,or)*c(1,rep(2,nm))))
-		      p0 = 1-p1-p2
-		      P(variant|case) = P(case|variant)P(variant)/sum(P(case|variant)P(variant))
-		  }
+	   t(sapply(1:n,function(j)
+		    {
+			sapply(1:nm,function(i)
+			       {
+				   #P(variant|case) = P(case|variant)P(variant)/sum(P(case|variant)P(variant))
+				   #sum(P(case|variant)P(variant))
+				   p0 = (invlogit(sum(c(beta0[i],lor[i])*c(1,0)))*((1-maf[i])^2))
+				   p1 = (invlogit(sum(c(beta0[i],lor[i])*c(1,1)))*(2*maf[i]*(1-maf[i])))
+				   p2 = (invlogit(sum(c(beta0[i],lor[i])*c(1,2)))*(maf[i]^2))
+				   p.sum = sum(p0,p1,p2)
+				   variant_assign = t(rmultinom(1,1,prob=c(p0,p1,p2)/p.sum))
+				   return( which(variant_assign == 1)-1)
+			       }
+			)
+		    })
 	   )
-
-    )
+	   )
 }
 
 ################################MAIN#########################################
