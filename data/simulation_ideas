@@ -16,8 +16,8 @@ no. of risk groups: 1
 no. of very common risk variants: 0
 no. of common risk variants: 0
 no. of rare risk variants: 10
-LOD of very common variants: 1.05
-LOD of common variants: 1.2
-LOD of rare variants: 20
+OR of very common variants: 1.05
+OR of common variants: 1.2
+OR of rare variants: 10
 independce of subjects: yes
 independce of variants (no LD): yes

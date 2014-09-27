@@ -19,9 +19,9 @@ n_risk_region = 1
 n_risk_very_common_var = 0
 n_risk_common_var = 0
 n_risk_rare_var = 10
-lod_very_common_var = 1.05
-lod_common_var = 1.2
-lod_rare_var = 20
+or_very_common_var = 1.05
+or_common_var = 1.2
+or_rare_var = 10
 #assume subjects are independent, variants are independent (no LD)
 ################################SUBROUTINES###################################
 #expand genotype counts to actual genotypes (0,1,2 minor alleles)
@@ -114,6 +114,47 @@ gen_hw_genotype  = function (nm = 100, n = rep(100, nm), f = rep(0, nm), p = run
     #expand Xt to the actual genotype (0,1,2 minor alleles)
     return(expand.geno(Xt))
 }
+#inverse of logit
+invlogit = function (x)
+{
+    return(exp(x)/(1+exp(x)))
+}
+#generate actual genotypes for each subject at risk loci
+#assume logistic regression model, binary outcome
+#nm number of markers
+#n number of subjects
+#case: vector indicating case or not, recycled
+#or: odds ratio vector, recycled
+#maf: minor allele frequency, recycled
+#beta0: constant in regression model
+gen_riskvar_genotype = function (nm,n,case=FALSE,or,maf,beta0=0)
+{
+    or=rep(or,nm)[1:nm]
+    case=rep(case,nm)[1:nm]
+    case[which(case)]=1
+    case[case!=1]=-1
+    maf=rep(maf,nm)[1:maf]
+
+    #sum(P(case|variant)P(variant))
+    p1.sum = sum(sapply(1:nm,function(i){invlogit(c(beta0,or[i])*c(1,1))*maf[i]}))
+    p2.sum = sum(sapply(1:nm,function(i){invlogit(c(beta0,or[i])*c(1,2))*maf[i]}))
+    p0.sum = sum(sapply(1:nm,function(i){invlogit(c(beta0,or[i])*c(1,0))*maf[i]}))
+    return(
+	   sapply(1:nm,function(i)
+		  {
+		      result = rep(NA,n)
+		      !!!!!
+		      #probability of disease when having 1 risk allele
+		      p1 = invlogit(sum(c(beta0,or)*c(1,rep(1,nm))))
+		      #probability of disease when having 2 risk alleles
+		      p2 = invlogit(sum(c(beta0,or)*c(1,rep(2,nm))))
+		      p0 = 1-p1-p2
+		      P(variant|case) = P(case|variant)P(variant)/sum(P(case|variant)P(variant))
+		  }
+	   )
+
+    )
+}
 
 ################################MAIN#########################################
 for (i in 1:n_replicate)
@@ -142,8 +183,8 @@ for (i in 1:n_replicate)
     #outcome and genotype (coded as 0,1,2 minor alleles)
     stopifnot(n_risk_rare_var>n_var*prop_rare)
     n_risk_rare_var
-    lod_rare_var
-    rpois(n_var*prop_rare-n_risk_rare_var,maf_rare)
+    or_rare_var
+    gen_hw_genotype(n_var*prop_rare-n_risk_rare_var,p=maf_rare)
     #genotype and annotation
     #genotype and region
 
