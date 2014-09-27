@@ -1,15 +1,21 @@
-# of simulations: 1000
-# of cases: 500
-# of controls: 500
-# of variants: 10000
-proportion of very common variants:
-proportion of common variants:
-proportion of rare variants:
-# of annotations: 2 (enhancer & promoter)
-# of group info: 10 (genes)
-# of very common risk variants: 1
-# of common risk variants: 2
-# of rare variants: 10
+#based on the study results from 202 genes sequencing in 14,002 samples
+#most variants are rare or private
+no. of simulations: 1000
+no. of cases: 500
+no. of controls: 500
+no. of variants: 10000
+proportion of very common variants: 0
+proportion of common variants: 0
+proportion of rare variants: 100%
+MAF of very common variants: 10%
+MAF of common variants: 5%
+MAF of rare variants: 0.5%
+no. of annotations: 2 (enhancer & promoter)
+no. of group info: 10 (genes)
+no. of risk groups: 1
+no. of very common risk variants: 0
+no. of common risk variants: 0
+no. of rare risk variants: 10
 LOD of very common variants: 1.05
 LOD of common variants: 1.2
 LOD of rare variants: 20
