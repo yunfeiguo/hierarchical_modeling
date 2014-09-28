@@ -7,13 +7,16 @@ n_ctrl = 500
 n_var = 10000
 prop_very_common = 0
 prop_common = 0
-prop_rare = 0
+#proportion of rare variants in all variants
+prop_rare = 1
 maf_very_common = 0.1
 maf_common = 0.05
 maf_rare = 0.005
 n_annot = 2
 #annot_cover percentage of all variants will have annotation
 annot_cover = 0.05
+#annot_cover_risk percentage of risk variants covered by annotation
+annot_cover_risk = 0.8
 n_region = 10
 n_risk_region = 1
 n_risk_very_common_var = 0
@@ -23,6 +26,7 @@ or_very_common_var = 1.05
 or_common_var = 1.2
 or_rare_var = 10
 #assume subjects are independent, variants are independent (no LD)
+#we only simulate rare variants, so ignore any code related to common variants
 ################################SUBROUTINES###################################
 #expand genotype counts to actual genotypes (0,1,2 minor alleles)
 expand.geno = function(x)
@@ -34,14 +38,12 @@ expand.geno = function(x)
 		       for(j in 1:3)
 		       {
 			   which = which(is.na(result))
-			   cat(which,"\n")
 			   if(length(which) <= 1)
 			   {
 			       if(x[i,j] > 0)
 				   result[which] = 3-j
 			   } else
 			   {
-			       cat(sample(which,x[i,j]),"\n")
 			       result[sample(which,x[i,j])] = 3-j
 			   }
 		       }
@@ -52,7 +54,7 @@ expand.geno = function(x)
 }
 #generate genotypes following Hardy-Weinberg equilibrium
 #modified from HWData function in HardyWeinberg package
-gen_hw_genotype  = function (nm = 100, n = rep(100, nm), f = rep(0, nm), p = runif(nm), 
+gen_hw_genotype  = function (nm = 100, n = 100, f = 0, p = runif(1), 
 			     pfixed = FALSE, exactequilibrium = FALSE, pdist = "runif", ...) 
     #refer to manual of HardyWeinberg package for help
 {
@@ -180,19 +182,38 @@ for (i in 1:n_replicate)
     bvsfile.region = paste("bvs.region.simulation",i,".txt",sep="")
 
     #prepare data
+    #put all risk variants at the end
+    n_risk_var = n_risk_rare_var + n_risk_common_var + n_risk_very_common_var
+    idx.risk = (n_var-n_risk_var+1):(n_var)
     case.data = matrix(NA,nrow=n_case,ncol=n_var+1)
     ctrl.data = matrix(NA,nrow=n_ctrl,ncol=n_var+1)
     case.data[,1] = 1
     ctrl.data[,1] = 0
     #outcome and genotype (coded as 0,1,2 minor alleles)
-    stopifnot(n_risk_rare_var>n_var*prop_rare)
-    n_risk_rare_var
-    or_rare_var
-    gen_hw_genotype(n_var*prop_rare-n_risk_rare_var,p=maf_rare)
+    stopifnot(n_risk_rare_var<=n_var*prop_rare)
+    hw_genotype = gen_hw_genotype(nm=n_var*prop_rare-n_risk_rare_var,n=n_case+n_ctrl,p=maf_rare)
+    case.data[,-1] = cbind(hw_genotype[1:n_case,], 
+			   gen_riskvar_genotype (nm=n_risk_rare_var,n=n_case,case=TRUE,or=or_rare_var,maf=maf_rare,beta0=0))
+    ctrl.data[,-1] = cbind(hw_genotype[(n_case+1):(n_case+n_ctrl),],
+			   gen_riskvar_genotype (nm=n_risk_rare_var,n=n_ctrl,case=FALSE,or=or_rare_var,maf=maf_rare,beta0=0))
+    phenogeno.data = rbind(case.data,ctrl.data)
+    rm(hw_genotype) #remove unnecessary memory
     #genotype and annotation
+    #make sure to put all risk variants in annotation besides other variants in annotation
+    #cov.data is pxq matrix, p for number of variants, q for number of annotations
+    cov.data = matrix(0,nrow=n_var,ncol=n_annot)
+    #assume sample will work (i.e. do not consider conditions that make sample fail)
+    cov.data[sample(1:nrow(cov.data),nrow(cov.data)*annot_cover),] = 1
+    cov.data[sample(idx.risk,n_risk_var*annot_cover_risk),] = 1
     #genotype and region
+    #make sure to put all risk variants into one region to maximize power
+    #p-dimesional vector identifying region for p variants
+    region.level = paste("pathway",1:n_region,sep="")
+    region.data = rep(NA,n_var)
+    region.data[-idx.risk] = region.level
+    #put all risk variants into region 1
+    region.data[idx.risk] = region.level[1]
 
-    data = rbind(case.data,ctrl.data)
     #output data for pimsa
     #output data for BVS
 }
