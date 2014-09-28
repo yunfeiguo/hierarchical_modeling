@@ -203,8 +203,11 @@ for (i in 1:n_replicate)
     #cov.data is pxq matrix, p for number of variants, q for number of annotations
     cov.data = matrix(0,nrow=n_var,ncol=n_annot)
     #assume sample will work (i.e. do not consider conditions that make sample fail)
-    cov.data[sample(1:nrow(cov.data),nrow(cov.data)*annot_cover),] = 1
-    cov.data[sample(idx.risk,n_risk_var*annot_cover_risk),] = 1
+    for (annot_i in 1:n_annot)
+    {
+	cov.data[sample(1:nrow(cov.data),nrow(cov.data)*annot_cover),annot_i] = 1
+	cov.data[sample(idx.risk,n_risk_var*annot_cover_risk),annot_i] = 1
+    }
     #genotype and region
     #make sure to put all risk variants into one region to maximize power
     #p-dimesional vector identifying region for p variants
