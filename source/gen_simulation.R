@@ -218,10 +218,11 @@ i=1
     #put all risk variants into region 1
     region.data[idx.risk] = region.level[1]
 
-    #output data for pimsa
+
+    ###############output data for pimsa######################
     pimsadata.trait = phenogeno.data[,1]
     write.table(pimsadata.trait,pimsafile.trait,quote=FALSE,row.names=FALSE,col.names=FALSE)
-    pimsadata.snplist = paste("snp",1:ncol(phenogeno.data),sep="")
+    pimsadata.snplist = paste("snp",1:ncol(phenogeno.data[,-1]),sep="")
     write.table(pimsadata.snplist,pimsafile.snplist,quote=FALSE,row.names=FALSE,col.names=FALSE)
     #0=missing,1=homozygous wildtype,2=heterozygous,3=homozygous mutant
     pimsadata.study_geno = apply(phenogeno.data[,-1]+1,1,function(x){paste(x,collapse="")})
@@ -239,6 +240,11 @@ i=1
     pimsadata.a_matrix = model.matrix(~region.data-1)
     write.table(pimsadata.a_matrix,pimsafile.a_matrix,quote=FALSE,row.names=FALSE,col.names=FALSE)
     rm(pimsadata.trait,pimsadata.snplist,pimsadata.study_geno,pimsadata.initmodel,pimsadata.z_matrix,pimsadata.a_matrix)
-    #output data for BVS
+
+
+    ####################output data for BVS#########################
+    write.table(phenogeno.data,bvsfile.datamatrix ,quote=FALSE,row.names=FALSE,col.names=FALSE)
+    write.table(cov.data,bvsfile.cov,quote=FALSE,row.names=FALSE,col.names=FALSE)
+    write.table(region.data,bvsfile.region,quote=FALSE,row.names=FALSE,col.names=FALSE)
     cat("Simulation data set",i,"done.\n")
 }

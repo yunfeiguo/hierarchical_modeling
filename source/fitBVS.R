@@ -34,7 +34,7 @@ fitBVS <- function(Z,data,forced=NULL,cov=NULL,a1=NULL,rare=FALSE,mult.regions=F
 	        regions = as.factor(regions)
 		#in '~regions-1', '-1' means removal of intercept term
 	        region.ind = model.matrix(~regions-1)	
-	        colnames(region.ind) = paste("G",c(1:length(levels(region.ind))),sep="")
+	        colnames(region.ind) = paste("G",c(1:length(levels(regions))),sep="")
 	    }
 	    #get names of covariates and predictors in the model
 	    predictors = c(names(forced),colnames(data[,-1])[Z>0])	
