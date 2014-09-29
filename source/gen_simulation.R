@@ -163,7 +163,8 @@ gen_riskvar_genotype = function (nm,n,case=FALSE,or,maf,beta0=0)
 }
 
 ################################MAIN#########################################
-for (i in 1:n_replicate)
+#for (i in 1:n_replicate)
+i=1
 {
     #we need prepare input for both pimsa and BVS
     #files for pimsa
@@ -171,7 +172,7 @@ for (i in 1:n_replicate)
     pimsafile.trait = paste("pimsa.trait.simulation",i,".txt",sep="")
     pimsafile.snplist = paste("pimsa.snplist.simulation",i,".txt",sep="")
     pimsafile.study_geno = paste("pimsa.study_geno.simulation",i,".txt",sep="")
-    pimsafile.study_env_var = paste("pimsa.study_env_var.simulation",i,".txt",sep="")
+    #pimsafile.study_env_var = paste("pimsa.study_env_var.simulation",i,".txt",sep="")
     pimsafile.initmodel = paste("pimsa.initmodel.simulation",i,".txt",sep="")
     pimsafile.z_matrix = paste("pimsa.z_matrix.simulation",i,".txt",sep="")
     pimsafile.a_matrix = paste("pimsa.a_matrix.simulation",i,".txt",sep="")
@@ -218,5 +219,26 @@ for (i in 1:n_replicate)
     region.data[idx.risk] = region.level[1]
 
     #output data for pimsa
+    pimsadata.trait = phenogeno.data[,1]
+    write.table(pimsadata.trait,pimsafile.trait,quote=FALSE,row.names=FALSE,col.names=FALSE)
+    pimsadata.snplist = paste("snp",1:ncol(phenogeno.data),sep="")
+    write.table(pimsadata.snplist,pimsafile.snplist,quote=FALSE,row.names=FALSE,col.names=FALSE)
+    #0=missing,1=homozygous wildtype,2=heterozygous,3=homozygous mutant
+    pimsadata.study_geno = apply(phenogeno.data[,-1]+1,1,function(x){paste(x,collapse="")})
+    write.table(pimsadata.study_geno,pimsafile.study_geno,quote=FALSE,row.names=FALSE,col.names=FALSE)
+    ##set all environmental variables to 0
+    #pimsadata.study_env_var = rep(0,nrow(phenogeno.data))
+    #write.table(pimsadata.study_env_var,pimsafile.study_env_var,quote=FALSE,row.names=FALSE,col.names=FALSE)
+    #just randomly choose 10 SNPs to include, SNP index is 0-based
+    pimsadata.initmodel = sample(1:ncol(phenogeno.data),10)-1
+    write.table(pimsadata.initmodel,pimsafile.initmodel,quote=FALSE,row.names=FALSE,col.names=FALSE)
+    #z_matrix is fixed effect matrix, ie annotation
+    pimsadata.z_matrix = cov.data
+    write.table(pimsadata.z_matrix,pimsafile.z_matrix,quote=FALSE,row.names=FALSE,col.names=FALSE)
+    #a_matrix is random effect matrix ie region
+    pimsadata.a_matrix = model.matrix(~region.data-1)
+    write.table(pimsadata.a_matrix,pimsafile.a_matrix,quote=FALSE,row.names=FALSE,col.names=FALSE)
+    rm(pimsadata.trait,pimsadata.snplist,pimsadata.study_geno,pimsadata.initmodel,pimsadata.z_matrix,pimsadata.a_matrix)
     #output data for BVS
+    cat("Simulation data set",i,"done.\n")
 }
