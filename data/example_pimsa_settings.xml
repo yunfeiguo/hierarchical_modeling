@@ -1,0 +1,37 @@
+<settings>
+    <database>
+	<enable>false</enable>
+	<host>mec.usc.edu</host>
+	<user>garyc</user>
+	<pw>m3teknik</pw>
+	<name>pathway_mcmc_folate</name>
+    </database>
+    <inputfiles>
+	<trait>pimsa.trait.simulation1.txt</trait>
+	<snplist>pimsa.snplist.simulation1.txt</snplist>
+	<study_geno>pimsa.study_geno.simulation1.txt</study_geno>
+	<study_env_var></study_env_var>
+	<initmodel>pimsa.initmodel.simulation1.txt</initmodel>
+	<annotation_files>
+	    <z_matrix>pimsa.z_matrix.simulation1.txt</z_matrix>
+	    <a_matrix>pimsa.a_matrix.simulation1.txt</a_matrix>
+	</annotation_files>
+	<endo_files>
+	    <prior_geno></prior_geno>
+	    <prior_env_var></prior_env_var>
+	    <prior_endopheno></prior_endopheno>
+	    <selected_endo></selected_endo>
+	</endo_files>
+    </inputfiles>
+    <sampling>
+	<use_endoprior>false</use_endoprior> <!--endo,annotation-->
+	<use_a>true</use_a>
+	<use_z>false</use_z>
+	<logistic>true</logistic>
+	<marginal_prior>false</marginal_prior>
+	<max_order>1</max_order>
+	<main_effect_pref>3</main_effect_pref>
+	<iterations>1000000</iterations>
+	<max_modelsize>100</max_modelsize>
+    </sampling>
+</settings>
