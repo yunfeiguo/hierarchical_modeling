@@ -4,7 +4,8 @@
 n_replicate = 1000
 n_case = 500
 n_ctrl = 500
-n_var = 10000
+#n_var = 10000
+n_var = 1000
 prop_very_common = 0
 prop_common = 0
 #proportion of rare variants in all variants
@@ -12,7 +13,8 @@ prop_rare = 1
 maf_very_common = 0.1
 maf_common = 0.05
 maf_rare = 0.005
-n_annot = 2
+#n_annot = 2
+n_annot = 12
 #annot_cover percentage of all variants will have annotation
 annot_cover = 0.05
 #annot_cover_risk percentage of risk variants covered by annotation
@@ -163,8 +165,7 @@ gen_riskvar_genotype = function (nm,n,case=FALSE,or,maf,beta0=0)
 }
 
 ################################MAIN#########################################
-#for (i in 1:n_replicate)
-i=1
+for (i in 1:n_replicate)
 {
     #we need prepare input for both pimsa and BVS
     #files for pimsa

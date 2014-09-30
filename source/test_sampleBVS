@@ -2,36 +2,90 @@
 
 use strict;
 use warnings;
-use Benchmark qw(:all);
+use Time::HiRes qw(time);
 use File::Spec;
 use XML::Simple;
 
-###########################GLOBAL###########################
-my $TMP="/tmp";
-my $PIMSA_TEMPLATE="pimsa.xml";
-#############################MAIN###########################
+###########################GLOBAL#######################################
+my $TMP = "/tmp";
+my $PIMSA_TEMPLATE = "example_pimsa_settings.xml";
+my $PIMSA_EXE = "pimsa";					     
+my $BVS_COMMAND = "run_sampleBVS.R";
+my $BVS_SIMULTATION_DATA_FILE_TEMPLATE = qw/bvs.cov.simulation1.txt 
+bvs.datamatrix.simulation1.txt 
+bvs.region.simulation1.txt
+/;
+my $PIMSA_SIMULATION_DATA_FILE_TEMPLATE = qw/pimsa.a_matrix.simulation1.txt 
+pimsa.initmodel.simulation1.txt 
+pimsa.snplist.simulation1.txt 
+pimsa.study_geno.simulation1.txt
+pimsa.trait.simulation1.txt
+pimsa.z_matrix.simulation1.txt
+/;
+##########################TUNING PARAMETERS###############################					     
 my $count=100;
-timethese($count,{
-	'sampleBVS'	=>	\&sampleBVS,
-	'sampleBVS2'	=>	\&sampleBVS2,
-});
+my $PIMSA_ITER = 500_000;
+my $BVS_ITER = 10_000;
+my $N_SIMULATION = 200;
+#############################MAIN#######################################
+&sampleBVS1;
 ##############################SUBROUTINES###############################
-sub sampleBVS
-{
-	my $pheno=;
-	my $geno=;
+sub sampleBVS1
+{#test the original sampleBVS without pimsa
+    my $start = time;
+    for my $i(1..$N_SIMULATION)
+    {
+	warn "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
+	warn "NOTE: sampleBVS1 running simultation $i\n";
+	warn "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
 	my $source=File::Spec->catfile($TMP,rand($$).".sampleBVS.rscript.tmp");
-
+	&prepare_source($BVS_COMMAND,$source,$i);
 	&run_r_script($source);
+	warn "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
+	warn "NOTE: sampleBVS1 finished simultation $i\n";
+	warn "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
+    }
+    my $end = time;
+    print "sampleBVS1: ",$end-$start," seconds for $N_SIMULATION simultations\n";
 }
-sub sampleBVS
-{
-	my $source=File::Spec->catfile($TMP,rand($$).".sampleBVS2.rscript.tmp");
+sub sampleBVS2
+{#test the modified sampleBVS without pimsa
+    my $source=File::Spec->catfile($TMP,rand($$).".sampleBVS2.rscript.tmp");
 
-	&run_r_script($source);
+    &run_r_script($source);
+}
+sub sampleBVS3
+{#test the modified sampleBVS with pimsa
+    my $source=File::Spec->catfile($TMP,rand($$).".sampleBVS2.rscript.tmp");
+
+    &run_r_script($source);
 }
 sub run_r_script
 {
-	my $source=shift;
-	!system("Rscript --vanilla $source") or die "Failed to run $source: $!\n";
+    my $source=shift;
+    !system("Rscript --vanilla $source") or die "Failed to run $source: $!\n";
+}
+sub prepare_source
+{
+    my $template = shift;
+    my $out = shift;
+    my $n = shift;
+
+    open IN,'<',$template or die "Failed to open $template: $!\n";
+    open OUT,'>',$out or die "Failed to write to $out: $!\n";
+    while(<IN>)
+    {
+	#replace simultation data sets
+	for my $i(@BVS_SIMULTATION_DATA_FILE_TEMPLATE)
+	{
+	    my $i_new = $i;
+	    $i_new =~ s/1/$n/;
+	    s/$i/$i_new/;
+	}
+	#replace iteration
+	s/bvs\.iter/$BVS_ITER/;
+	print OUT;
+    }
+    close IN;
+    close OUT;
 }
