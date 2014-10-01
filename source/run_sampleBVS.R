@@ -8,7 +8,7 @@ cov=as.matrix(read.table("bvs.cov.simulation1.txt"))
 region=as.matrix(read.table("bvs.region.simulation1.txt"))
 result=sampleBVS(cov=cov,inform=TRUE,mult.regions=TRUE,regions=region,iter=BVS_ITERATION,data=data,rare=TRUE,status.file="/dev/null")
 summary.result = summaryBVS(result,data,rare=TRUE,mult.regions=TRUE,cov=cov,regions=region,inform=TRUE,burnin=BVS_BURNIN)
-sapply(c("Global","MargBF","Marg.RBF"),function(i){
+sapply(c("Global","Marg.RBF"),function(i){
        write(paste(i,summary.result[[which(names(summary.result)==i)]]),
 	     "bvs.result.simulation1.txt",append=TRUE)
 })
