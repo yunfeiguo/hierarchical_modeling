@@ -1,76 +1,113 @@
 summaryBVS = function(BVS.out,data=data,forced=NULL,cov=NULL,burnin=1000,regions=NULL,rare=FALSE,mult.regions=FALSE,inform=FALSE){
-	if(burnin>0){
-	  which = BVS.out$which[-c(1:burnin)]
-	  if(rare==FALSE || mult.regions==TRUE){
-	    coef = BVS.out$coef[-c(1:burnin),]}
-	  if(rare==TRUE & mult.regions==FALSE){
-        coef = BVS.out$coef[-c(1:burnin)]}
-	  fitness = BVS.out$fitness[-c(1:burnin)]
-	  logPrM = BVS.out$logPrM[-c(1:burnin)]
-	  if(is.matrix(BVS.out$alpha)==FALSE){
-	  	a1 = BVS.out$alpha[-c(1:burnin)]}
-	  if(is.matrix(BVS.out$alpha)==TRUE){
-	  	a1 = BVS.out$alpha[-c(1:burnin),]}
-	  }
-	if(burnin==0){
+	if(burnin>0)
+	{
+	    which = BVS.out$which[-c(1:burnin)]
+	    if(rare==FALSE || mult.regions==TRUE)
+	    {
+		coef = BVS.out$coef[-c(1:burnin),]
+	    }
+	    if(rare==TRUE & mult.regions==FALSE)
+	    {
+		coef = BVS.out$coef[-c(1:burnin)]
+	    }
+	    fitness = BVS.out$fitness[-c(1:burnin)]
+	    logPrM = BVS.out$logPrM[-c(1:burnin)]
+	    if(is.matrix(BVS.out$alpha)==FALSE)
+	    {
+		a1 = BVS.out$alpha[-c(1:burnin)]
+	    }
+	    if(is.matrix(BVS.out$alpha)==TRUE)
+	    {
+		a1 = BVS.out$alpha[-c(1:burnin),]
+	    }
+	}
+	if(burnin==0)
+	{
 	  which = BVS.out$which
 	  coef = BVS.out$coef
 	  fitness = BVS.out$fitness
 	  logPrM = BVS.out$logPrM
-	  a1 = BVS.out$alpha}
+	  a1 = BVS.out$alpha
+	}
 	  
 	  
-	if(is.matrix(a1)==FALSE){
-		a1 = as.matrix(a1)}
+	if(is.matrix(a1)==FALSE)
+	{
+		a1 = as.matrix(a1)
+	}
 		
 	
 	##Parameters
-	p = dim(data)[2] - 1
-	snps = colnames(data)[-1]
-	c = dim(cov)[2]
-	r = dim(cov)[1]
-	if(length(cov)==0){
+	p = dim(data)[2] - 1 #number of variants
+	snps = colnames(data)[-1] #SNP names
+	c = dim(cov)[2] #number of predictor-level covariates
+	r = dim(cov)[1] #number of variants (supposed to be equal to p)
+	if(length(cov)==0)
+	{
 	   c=1
-	   r=p}
-	a0 = qnorm((1-2^(-1/r)))
+	   r=p
+	}
+	#weights for predictor-level covariates under base 
+	#condition (probability of no variants are associated 
+	#and probability of at least one variant is associatied 
+	#is equal)
+	a0 = qnorm((1-2^(-1/r))) 
 	
 	##coef.ind
-	if(rare==FALSE){coef.ind=1:p}
-	if(rare==TRUE&mult.regions==FALSE){coef.ind=1}
-	if(rare==TRUE&mult.regions==TRUE){
-		coef.ind=1:length(unique(regions))}
+	if(rare==FALSE)
+	{
+	    coef.ind=1:p
+	}
+	if(rare==TRUE&mult.regions==FALSE)
+	{#treat all variants as one group if rare==TRUE
+	    coef.ind=1
+	}
+	if(rare==TRUE&mult.regions==TRUE)
+	{
+		coef.ind=1:length(unique(regions))
+	}
 	   
 	##Make sure Null model is in the results
 	null.fit = fitBVS(rep(0,p),data=data,forced=NULL,cov=cov,a1=rep(0,c),rare=rare,mult.regions=mult.regions,regions=regions,inform=inform,which=NULL)
 	Z.null = paste(rep(0,p),collapse="")
-	if(sum(which==Z.null)==0){
+	if(sum(which==Z.null)==0)
+	{#if we got here, null model is not in the results
 		which = c(Z.null,which)
 		coef = rbind(rep(0,length(coef.ind)),coef)
 		fitness = c(null.fit[length(coef.ind)+1],fitness)
-		logPrM = c(null.fit[length(coef.ind)+2],logPrM)}
+		logPrM = c(null.fit[length(coef.ind)+2],logPrM)
+	}
 	which =as.matrix(which)	
 	rownames(which) = c(1:dim(which)[1])
 	
 	##Post expectation of alpha
-	if(is.matrix(BVS.out$alpha)==FALSE){
-	  	post.alpha = mean(a1)}
-	if(is.matrix(BVS.out$alpha)==TRUE){
-	  	post.alpha = apply(a1,2,mean)}
+	if(is.matrix(BVS.out$alpha)==FALSE)
+	{#why use mean???
+	  	post.alpha = mean(a1)
+	}
+	if(is.matrix(BVS.out$alpha)==TRUE)
+	{
+	  	post.alpha = apply(a1,2,mean)
+	}
 		
 	##If inform==TRUE average prior inclusion probability across multiple values of alpha!
-	if(inform==TRUE){
-	  eta = t(a0+as.matrix(cov)%*%t(a1))
-	  inc.prob = function(x){mean(pnorm(0,mean=x,lower.tail=FALSE))}
-	  Prior.marg = apply(eta,2,inc.prob)
-	  lprob.inc = log(Prior.marg)
-	  lprob.ninc = log(1-Prior.marg)
-	  Nulllprob.ninc = pnorm(0,mean=a0,lower.tail=TRUE,log.p=TRUE)
-	  NullPrior.marg = 1 - exp(Nulllprob.ninc)
-	  ##Global Priors
-	  Prior.null = exp(sum(lprob.ninc))	    
-      Prior.alt = 1-Prior.null}
+	if(inform==TRUE)
+	{
+	    eta = t(a0+as.matrix(cov)%*%t(a1))
+	    inc.prob = function(x){mean(pnorm(0,mean=x,lower.tail=FALSE))}
+	    #for each predictor, use inc.prob to calculate average inclusion prob.
+	    Prior.marg = apply(eta,2,inc.prob)
+	    lprob.inc = log(Prior.marg)
+	    lprob.ninc = log(1-Prior.marg)
+	    Nulllprob.ninc = pnorm(0,mean=a0,lower.tail=TRUE,log.p=TRUE)
+	    NullPrior.marg = 1 - exp(Nulllprob.ninc)
+	    ##Global Priors
+	    Prior.null = exp(sum(lprob.ninc))	    
+	    Prior.alt = 1-Prior.null
+	}
       
-	if(inform==FALSE){
+	if(inform==FALSE)
+	{
 	  NullPrior.marg = (1/(p+1))
       Prior.null = .5
       Prior.alt =.5	
@@ -81,21 +118,36 @@ summaryBVS = function(BVS.out,data=data,forced=NULL,cov=NULL,burnin=1000,regions
 	u.which = unique(which)
 	u.ind = as.numeric(rownames(u.which))
 	u.which.char = u.which
-	if(p>1){
-	  u.which = t(apply(u.which,1,function(x){as.numeric(unlist(strsplit(x,split="")))}))}
-	if(p==1){
-	  u.which = as.matrix(apply(u.which,1,function(x){as.numeric(unlist(strsplit(x,split="")))}))}
-	if(rare==FALSE || mult.regions==TRUE){
-	   u.coef = coef[u.ind,]}
-	if(rare==TRUE&mult.regions==FALSE){
-	   u.coef = coef[u.ind]}
+	if(p>1)
+	{#the following statement transforms u.which to a iterxp matrix
+	  u.which = t(apply(u.which,1,function(x){as.numeric(unlist(strsplit(x,split="")))}))
+	}
+	if(p==1)
+	{
+	  u.which = as.matrix(apply(u.which,1,function(x){as.numeric(unlist(strsplit(x,split="")))}))
+	}
+	if(rare==FALSE || mult.regions==TRUE)
+	{
+	   u.coef = coef[u.ind,]
+	}
+	if(rare==TRUE&mult.regions==FALSE)
+	{
+	   u.coef = coef[u.ind]
+	}
+	#only retain data after burnin
 	u.fitness = fitness[u.ind]
+	#only retain data after burnin
 	new.lPrM = logPrM[u.ind]
-	if(inform==TRUE){   
+	if(inform==TRUE)
+	{   
 	  new.lPrM = apply(u.which,1,function(x){t(x)%*%lprob.inc + t(1-x)%*%lprob.ninc})
-	  u.fitness = fitness[u.ind] + logPrM[u.ind] - new.lPrM}
-	
+	#in sampleBVS, fitness = ll-logPrM, so the following statement
+	#we only use averaged alpha to calculate prior inclusion probability
+	#why? the averaged alpha is a Monte Carlo estimate of the real alpha
+	  u.fitness = fitness[u.ind] + logPrM[u.ind] - new.lPrM
+	}
 	##Calculate Posterior model probabilities
+	#fitness values are positive, should be converted to negative for probability calculation
     PrMgivenD = exp(-u.fitness+min(u.fitness))/sum(exp(-u.fitness+min(u.fitness)))
 	 
 	
@@ -111,7 +163,6 @@ summaryBVS = function(BVS.out,data=data,forced=NULL,cov=NULL,burnin=1000,regions
 	Global.marg.BF <- log(Post.marg) - log(Post.marg.n) - log(NullPrior.marg) +  log(1-NullPrior.marg)
 	which = cbind(u.which,exp(new.lPrM),PrMgivenD)
 	colnames(which) = c(colnames(data)[-1],"Prior","PostProb")
-	
 	##Gene Inclusion probabilities
 	which.r = NULL
 	Region.marg.BF = NULL

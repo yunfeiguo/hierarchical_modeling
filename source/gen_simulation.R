@@ -1,32 +1,31 @@
 ##########################PARAMETERS#############################
 #based on the study results from 202 genes sequencing in 14,002 samples
 #most variants are rare or private
-n_replicate = 1000
-n_case = 500
-n_ctrl = 500
+n_replicate = 200 #number of simulation data sets
+n_case = 500 #number of cases
+n_ctrl = 500 #number of controls
 #n_var = 10000
-n_var = 1000
-prop_very_common = 0
-prop_common = 0
+n_var = 1000 #total number of variants
+prop_very_common = 0 #proportion of very common variants
+prop_common = 0 #proportion of common variants
 #proportion of rare variants in all variants
-prop_rare = 1
-maf_very_common = 0.1
-maf_common = 0.05
-maf_rare = 0.005
-#n_annot = 2
-n_annot = 12
+prop_rare = 1 #proportion of rare variants
+maf_very_common = 0.1 #MAF of very common variants
+maf_common = 0.05 #MAF of common variants
+maf_rare = 0.005 #MAF of rare variants
+n_annot = 12 #number of annotations (predictor-level covariates)
 #annot_cover percentage of all variants will have annotation
 annot_cover = 0.05
 #annot_cover_risk percentage of risk variants covered by annotation
 annot_cover_risk = 0.8
-n_region = 10
-n_risk_region = 1
-n_risk_very_common_var = 0
-n_risk_common_var = 0
-n_risk_rare_var = 10
-or_very_common_var = 1.05
-or_common_var = 1.2
-or_rare_var = 10
+n_region = 10 #number of regions(genes/pathways)
+n_risk_region = 1 #number of regions associated with disease
+n_risk_very_common_var = 0 #number of very common risk variants
+n_risk_common_var = 0 #number of common risk variants
+n_risk_rare_var = 10 #number of rare risk variants
+or_very_common_var = 1.05 #OR of very common risk variants
+or_common_var = 1.2 #OR of common risk variants
+or_rare_var = 10 #OR of rare risk variants
 #assume subjects are independent, variants are independent (no LD)
 #we only simulate rare variants, so ignore any code related to common variants
 ################################SUBROUTINES###################################
@@ -165,7 +164,8 @@ gen_riskvar_genotype = function (nm,n,case=FALSE,or,maf,beta0=0)
 }
 
 ################################MAIN#########################################
-for (i in 1:n_replicate)
+#for (i in 1:n_replicate)
+i=1
 {
     #we need prepare input for both pimsa and BVS
     #files for pimsa

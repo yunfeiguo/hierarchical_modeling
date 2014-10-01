@@ -42,6 +42,12 @@ plotBVS = function(results, num.models=100, num.snps=20, num.regions=20, plot.co
     rownms <- paste(snps,regions,sep="\n")
     clr <- c("#FFFFFF", "#A020F0", "#0000CD")
     ordr <- ordr[1:nvar]
+    cat("45\n")
+    cat(which)
+    cat("47\n")
+    cat(nmodel,"\n")
+    cat(nvar,"\n")
+    cat(ordr,"\n")
     color.matrix = which[1:(nmodel),ordr[1:nvar]]
     for(i in 1:dim(color.matrix)[2]){color.matrix[,i] = as.numeric(color.matrix[,i])}
     color.matrix <- color.matrix + 2

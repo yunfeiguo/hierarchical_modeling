@@ -7,13 +7,14 @@ use File::Spec;
 use XML::Simple;
 
 ###########################GLOBAL#######################################
-my $TMP = "/tmp";
+my $TMP = "/state/partition1";
 my $PIMSA_TEMPLATE = "example_pimsa_settings.xml";
 my $PIMSA_EXE = "pimsa";					     
 my $BVS_COMMAND = "run_sampleBVS.R";
 my $BVS_SIMULTATION_DATA_FILE_TEMPLATE = qw/bvs.cov.simulation1.txt 
 bvs.datamatrix.simulation1.txt 
 bvs.region.simulation1.txt
+bvs.result.simulation1.txt
 /;
 my $PIMSA_SIMULATION_DATA_FILE_TEMPLATE = qw/pimsa.a_matrix.simulation1.txt 
 pimsa.initmodel.simulation1.txt 
@@ -22,13 +23,16 @@ pimsa.study_geno.simulation1.txt
 pimsa.trait.simulation1.txt
 pimsa.z_matrix.simulation1.txt
 /;
-##########################TUNING PARAMETERS###############################					     
+##########################TUNING PARAMETERS############################### 
 my $count=100;
 my $PIMSA_ITER = 500_000;
 my $BVS_ITER = 10_000;
+my $BVS_BURNIN = 1_000;
 my $N_SIMULATION = 200;
 #############################MAIN#######################################
 &sampleBVS1;
+#&sampleBVS2;
+#&sampleBVS3;
 ##############################SUBROUTINES###############################
 sub sampleBVS1
 {#test the original sampleBVS without pimsa
@@ -83,7 +87,8 @@ sub prepare_source
 	    s/$i/$i_new/;
 	}
 	#replace iteration
-	s/bvs\.iter/$BVS_ITER/;
+	s/BVS_ITERATION/$BVS_ITER/;
+	s/BVS_BURNIN/$BVS_BURNIN/;
 	print OUT;
     }
     close IN;
