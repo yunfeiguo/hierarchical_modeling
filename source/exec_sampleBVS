@@ -1,0 +1,68 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+use Fcntl qw(:flock SEEK_END);
+use Time::HiRes qw(time);
+
+#execute a sampleBVS R script
+#extract results and write them to a file
+die "Usage: $0 <sampleBVS R script> <n> <result file>" unless @ARGV==3;
+
+my $source = shift @ARGV;
+my $n = shift @ARGV;
+my $result = shift @ARGV;
+#result format
+#N	TIME	GLOBAL_BF	RBF1	RBF2	RBF3...
+#N	ERROR
+
+warn "NOTE: Began executing simulation $n\n";
+my $start = time;
+!system("Rscript --vanilla $source") or &error($n,$result);
+warn "NOTE: Simulation $n done\n";
+my $time_spent = time - $start;
+&write_result($n,$result,$time_spent);
+warn "NOTE: Results for simulation $n written to $result\n";
+####################SUBROUTINES#############################
+sub write_result
+{
+	my $n = shift;
+	my $result = shift;
+	my $time = shift;
+	my $data_file = "bvs.result.simulation$n.txt";
+	#format of input (single line)
+	#GlobalBF BF1 BF2 ...
+	open IN,'<',$data_file or die "Failed to read $data_file: $!\n";
+	my $data = <IN>;
+	chomp $data;
+	close IN;
+	#always append to result
+	open OUT,'>>',$result or die "Failed to open $result: $!\n";
+	&lock(\*OUT);
+	print OUT "$n\t$time\t",join("\t",(split " ",$data)),"\n";
+	&unlock(\*OUT);
+	close OUT;
+}
+sub error
+{
+	my $n = shift;
+	my $result = shift;
+	#always append to result
+	open OUT,'>>',$result or die "Failed to open $result: $!\n";
+	&lock(\*OUT);
+	print OUT "$n\tERROR\n";
+	&unlock(\*OUT);
+	close OUT;
+	exit 1;
+}
+sub lock
+{
+	my $fh=shift;
+	flock ($fh,LOCK_EX) or die "Failed to lock: $!\n";
+	seek ($fh,0,SEEK_END) or die "Cannot seek: $!\n";
+}
+sub unlock
+{
+	my $fh=shift;
+	flock ($fh,LOCK_UN) or die "Cannot unlock: $!\n";
+}
