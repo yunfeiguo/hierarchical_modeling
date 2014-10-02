@@ -7,7 +7,7 @@ use Time::HiRes qw(time);
 
 #execute a sampleBVS R script
 #extract results and write them to a file
-die "Usage: $0 <tmpdir> <sampleBVS R script> <individual result file> <n> <comprehensive result file>" unless @ARGV==5;
+die "Usage: $0 <tmpdir> <sampleBVS R script> <individual result file> <n> <comprehensive result file> [additional arguments as arguments ...]" unless @ARGV>=5;
 
 my $tmpdir = shift @ARGV;
 my $source = shift @ARGV;
@@ -22,7 +22,7 @@ mkdir $tmpdir or &error($n,"Failed to create $tmpdir: $!",$result) unless -d $tm
 chdir $tmpdir or &error($n,"Failed to enter $tmpdir: $!",$result);
 warn "NOTE: Began executing simulation $n\n";
 my $start = time;
-!system("Rscript --vanilla $source") or &error($n,"Failed to run script: $!",$result);
+!system("Rscript --vanilla $source @ARGV") or &error($n,"Failed to run script: $!",$result);
 warn "NOTE: Simulation $n done\n";
 my $time_spent = time - $start;
 chdir ".." or &error($n,"Failed to enter $tmpdir: $!",$result);

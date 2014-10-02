@@ -1,7 +1,6 @@
 require('BVS')
 source("/home/yunfeiguo/projects/Hierarchical_modeling/ASHG2014/source/fitBVS.R")
 source("/home/yunfeiguo/projects/Hierarchical_modeling/ASHG2014/source/sampleBVS.R")
-source("/home/yunfeiguo/projects/Hierarchical_modeling/ASHG2014/source/sampleBVS2.R")
 source("/home/yunfeiguo/projects/Hierarchical_modeling/ASHG2014/source/summaryBVS.R")
 data=read.table("bvs.datamatrix.simulation1.txt")
 cov=as.matrix(read.table("bvs.cov.simulation1.txt"))

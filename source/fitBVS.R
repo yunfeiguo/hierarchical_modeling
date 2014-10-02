@@ -75,10 +75,13 @@ fitBVS <- function(Z,data,forced=NULL,cov=NULL,a1=NULL,rare=FALSE,mult.regions=F
 	    	  which.ind = which.ind[apply(risk.index,2,sum)>0]
 	    	  col.names =  paste("RI",colnames(region.ind)[apply(risk.index,2,sum)>0],sep=".")
 	    	  risk.index = as.matrix(risk.index[,apply(risk.index,2,sum)>0])
+		  if(dim(risk.index)[2]>0)
+		  {
 	    	  colnames(risk.index) = col.names
 	    	  
 	    	  data.i = cbind(data,risk.index)
 	    	  predictors=c(names(forced),colnames(risk.index))
+		  }
 	      }
 	    	  
 	      ##If we are doing a haplotype analysis estimate haplotypes and new predict vector
@@ -130,7 +133,7 @@ fitBVS <- function(Z,data,forced=NULL,cov=NULL,a1=NULL,rare=FALSE,mult.regions=F
 	     
  
 	    ##Calculate prior on the model
-	    ##If inform ==TRUE use probit specification and if mult.regions==TRUE use region level probit specification
+	    ##If inform ==TRUE use probit specification and if mult.regions==TRUE use region level probit specifiation
 	    if(inform==TRUE)
 	    {
 	      eta = a0+as.matrix(cov)%*%as.matrix(a1)

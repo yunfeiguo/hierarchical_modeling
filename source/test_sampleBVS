@@ -13,11 +13,13 @@ my $TMP = "/state/partition1";
 my $PIMSA_TEMPLATE = File::Spec->catfile($RealBin,"example_pimsa_settings.xml");
 my $PIMSA_EXE = "pimsa";					     
 my $BVS_COMMAND = File::Spec->catfile($RealBin,"run_sampleBVS.R");
+my $BVS_COMMAND_WITH_PIMSA = File::Spec->catfile($RealBin,"run_sampleBVS_with_pimsa.R");
 my $EXEC = File::Spec->catfile($RealBin,"exec_sampleBVS");
 my @BVS_SIMULTATION_DATA_FILE_TEMPLATE = qw/
 bvs.cov.simulation1.txt 
 bvs.datamatrix.simulation1.txt 
 bvs.region.simulation1.txt
+example_pimsa_settings.simulation1.xml
 /;
 my $BVS_OUTPUT = "bvs.result.simulation1.txt";
 my @PIMSA_SIMULATION_DATA_FILE_TEMPLATE = qw/pimsa.a_matrix.simulation1.txt 
@@ -29,14 +31,18 @@ pimsa.z_matrix.simulation1.txt
 /;
 my @PIMSA_OUTPUT = qw/models.out betas.out/;
 ##########################TUNING PARAMETERS############################### 
-my $PIMSA_ITER = 500_000;
+my $PIMSA_ITER = 50_000;
 my $BVS_ITER = 10_000;
 my $BVS_BURNIN = 1_000;
-my $N_SIMULATION = 200;
+#my $N_SIMULATION = 200;
+#my $PIMSA_ITER = 500;
+#my $BVS_ITER = 100;
+#my $BVS_BURNIN = 10;
+my $N_SIMULATION = 5;
 #############################MAIN#######################################
-&sampleBVS1;
+#&sampleBVS1;
 #&sampleBVS2;
-#&sampleBVS3;
+&sampleBVS3;
 ##############################SUBROUTINES###############################
 sub sampleBVS1
 {#test the original sampleBVS without pimsa
@@ -49,7 +55,8 @@ sub sampleBVS1
 	my $tmpdir = File::Spec->catdir($TMP,"sampleBVS1.simultation$i.tmpdir");
 	my $source = abs_path($$.rand($$).".sampleBVS1.simulation$i.rscript.tmp");
 	&prepare_source($BVS_COMMAND,$source,$i);
-	&submit_job("$EXEC $tmpdir $source ".abs_path($BVS_OUTPUT)." $i $outfile"," -l h_vmem=4g");
+	&submit_job("$EXEC $tmpdir $source ".abs_path($BVS_OUTPUT)." $i $outfile"," -l h_vmem=4g -m ea -M guoyunfei1989\@gmail.com");
+	#&submit_job("$EXEC $tmpdir $source ".abs_path($BVS_OUTPUT)." $i $outfile"," -l h_vmem=4g");
     }
     warn "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
     warn "NOTE: sampleBVS1 done\n";
@@ -63,10 +70,23 @@ sub sampleBVS2
 }
 sub sampleBVS3
 {#test the modified sampleBVS with pimsa
-    my $source=File::Spec->catfile($TMP,rand($$).".sampleBVS2.rscript.tmp");
-    #&prepare_source($PIMSA_TEMPLATE,$source,$i);
-
-    &run_r_script($source);
+    warn "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
+    warn "NOTE: sampleBVS3 running \n";
+    warn "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
+    my $outfile = abs_path("sampleBVS3.result.txt");
+    for my $i(1..$N_SIMULATION)
+    {
+	my $tmpdir = File::Spec->catdir($TMP,"sampleBVS3.simultation$i.tmpdir");
+	my $source = abs_path($$.rand($$).".sampleBVS3.simulation$i.rscript.tmp");
+	my $pimsa_xml = abs_path("example_pimsa_settings.simulation$i.xml");
+	&prepare_source($BVS_COMMAND_WITH_PIMSA,$source,$i);
+	&prepare_source($PIMSA_TEMPLATE,$pimsa_xml,$i);
+	&submit_job("$EXEC $tmpdir $source ".abs_path($BVS_OUTPUT)." $i $outfile $PIMSA_EXE"," -l h_vmem=12g -m ea -M guoyunfei1989\@gmail.com");
+	#&submit_job("$EXEC $tmpdir $source ".abs_path($BVS_OUTPUT)." $i $outfile $PIMSA_EXE"," -l h_vmem=12g");
+    }
+    warn "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
+    warn "NOTE: sampleBVS3 done\n";
+    warn "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
 }
 sub prepare_source
 {

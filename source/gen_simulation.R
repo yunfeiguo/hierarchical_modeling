@@ -1,11 +1,11 @@
 ##########################PARAMETERS#############################
 #based on the study results from 202 genes sequencing in 14,002 samples
 #most variants are rare or private
-n_replicate = 200 #number of simulation data sets
+n_replicate = 5 #number of simulation data sets
 n_case = 500 #number of cases
 n_ctrl = 500 #number of controls
 #n_var = 10000
-n_var = 10000 #total number of variants
+n_var = 1000 #total number of variants
 prop_very_common = 0 #proportion of very common variants
 prop_common = 0 #proportion of common variants
 #proportion of rare variants in all variants
