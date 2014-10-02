@@ -31,18 +31,18 @@ pimsa.z_matrix.simulation1.txt
 /;
 my @PIMSA_OUTPUT = qw/models.out betas.out/;
 ##########################TUNING PARAMETERS############################### 
-my $PIMSA_ITER = 50_000;
-my $BVS_ITER = 10_000;
-my $BVS_BURNIN = 1_000;
+#my $PIMSA_ITER = 50_000;
+#my $BVS_ITER = 10_000;
+#my $BVS_BURNIN = 1_000;
 #my $N_SIMULATION = 200;
-#my $PIMSA_ITER = 500;
-#my $BVS_ITER = 100;
-#my $BVS_BURNIN = 10;
-my $N_SIMULATION = 5;
+my $PIMSA_ITER = 500;
+my $BVS_ITER = 100;
+my $BVS_BURNIN = 10;
+my $N_SIMULATION = 1;
 #############################MAIN#######################################
-#&sampleBVS1;
+&sampleBVS1;
 #&sampleBVS2;
-&sampleBVS3;
+#&sampleBVS3;
 ##############################SUBROUTINES###############################
 sub sampleBVS1
 {#test the original sampleBVS without pimsa
@@ -55,8 +55,9 @@ sub sampleBVS1
 	my $tmpdir = File::Spec->catdir($TMP,"sampleBVS1.simultation$i.tmpdir");
 	my $source = abs_path($$.rand($$).".sampleBVS1.simulation$i.rscript.tmp");
 	&prepare_source($BVS_COMMAND,$source,$i);
-	&submit_job("$EXEC $tmpdir $source ".abs_path($BVS_OUTPUT)." $i $outfile"," -l h_vmem=4g -m ea -M guoyunfei1989\@gmail.com");
+	#&submit_job("$EXEC $tmpdir $source ".abs_path($BVS_OUTPUT)." $i $outfile"," -l h_vmem=4g -m ea -M guoyunfei1989\@gmail.com");
 	#&submit_job("$EXEC $tmpdir $source ".abs_path($BVS_OUTPUT)." $i $outfile"," -l h_vmem=4g");
+	die("$EXEC $tmpdir $source ".abs_path($BVS_OUTPUT)." $i $outfile\n");
     }
     warn "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
     warn "NOTE: sampleBVS1 done\n";

@@ -12,5 +12,9 @@ summary.result = summaryBVS(result,data,rare=TRUE,mult.regions=TRUE,cov=cov,regi
 #       write(paste(i,summary.result[[which(names(summary.result)==i)]]),
 #	     "bvs.result.simulation1.txt",append=TRUE)
 #})
-write(paste(summary.result$Global,paste(summary.result$Marg.RBF,collapse=" "),sep=" "),
+write(summary.result$Global,
       "bvs.result.simulation1.txt")
+write(paste(summary.result$Marg.RBF,collapse=" "),
+      append=TRUE,"bvs.result.simulation1.txt")
+write(paste(summary.result$MargBF,collapse=" "),
+      append=TRUE,"bvs.result.simulation1.txt")

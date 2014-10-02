@@ -39,13 +39,16 @@ sub write_result
 	#format of input (single line)
 	#GlobalBF BF1 BF2 ...
 	open IN,'<',$data_file or die "Failed to read $data_file: $!\n";
-	my $data = <IN>;
-	chomp $data;
+	my @data = <IN>;
+	chomp @data;
 	close IN;
 	#always append to result
 	open OUT,'>>',$result or die "Failed to open $result: $!\n";
 	&lock(\*OUT);
-	print OUT "$n\t$time\t",join("\t",(split " ",$data)),"\n";
+	print OUT "$n\t$time\tGLOBAL_BF\t$data[0]\t"; #n, time, global BF
+	print OUT join("\t","REGIONAL_BF",(split " ",$data[1])),"\t"; #count and values of regional BF
+	print OUT join("\t","MARGINAL_BF",(split " ",$data[2])); #count and values of variant BF
+	print OUT "\n";
 	&unlock(\*OUT);
 	close OUT;
 }
