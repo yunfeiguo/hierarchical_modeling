@@ -7,21 +7,27 @@ use Time::HiRes qw(time);
 
 #execute a sampleBVS R script
 #extract results and write them to a file
-die "Usage: $0 <sampleBVS R script> <n> <result file>" unless @ARGV==3;
+die "Usage: $0 <tmpdir> <sampleBVS R script> <individual result file> <n> <comprehensive result file>" unless @ARGV==5;
 
+my $tmpdir = shift @ARGV;
 my $source = shift @ARGV;
+my $data_file = shift @ARGV;
 my $n = shift @ARGV;
 my $result = shift @ARGV;
 #result format
 #N	TIME	GLOBAL_BF	RBF1	RBF2	RBF3...
 #N	ERROR
 
+mkdir $tmpdir or &error($n,"Failed to create $tmpdir: $!",$result) unless -d $tmpdir;
+chdir $tmpdir or &error($n,"Failed to enter $tmpdir: $!",$result);
 warn "NOTE: Began executing simulation $n\n";
 my $start = time;
-!system("Rscript --vanilla $source") or &error($n,$result);
+!system("Rscript --vanilla $source") or &error($n,"Failed to run script: $!",$result);
 warn "NOTE: Simulation $n done\n";
 my $time_spent = time - $start;
-&write_result($n,$result,$time_spent);
+chdir ".." or &error($n,"Failed to enter $tmpdir: $!",$result);
+!system("rm -rf $tmpdir") or &error($n,"Failed to remove $tmpdir: $!\n",$result);
+&write_result($n,$result,$time_spent,$data_file);
 warn "NOTE: Results for simulation $n written to $result\n";
 ####################SUBROUTINES#############################
 sub write_result
@@ -29,7 +35,7 @@ sub write_result
 	my $n = shift;
 	my $result = shift;
 	my $time = shift;
-	my $data_file = "bvs.result.simulation$n.txt";
+	my $data_file = shift;
 	#format of input (single line)
 	#GlobalBF BF1 BF2 ...
 	open IN,'<',$data_file or die "Failed to read $data_file: $!\n";
@@ -46,11 +52,12 @@ sub write_result
 sub error
 {
 	my $n = shift;
+	my $msg = shift;
 	my $result = shift;
 	#always append to result
 	open OUT,'>>',$result or die "Failed to open $result: $!\n";
 	&lock(\*OUT);
-	print OUT "$n\tERROR\n";
+	print OUT "$n\tERROR\t$msg\n";
 	&unlock(\*OUT);
 	close OUT;
 	exit 1;

@@ -5,7 +5,7 @@ n_replicate = 200 #number of simulation data sets
 n_case = 500 #number of cases
 n_ctrl = 500 #number of controls
 #n_var = 10000
-n_var = 1000 #total number of variants
+n_var = 10000 #total number of variants
 prop_very_common = 0 #proportion of very common variants
 prop_common = 0 #proportion of common variants
 #proportion of rare variants in all variants
@@ -13,7 +13,7 @@ prop_rare = 1 #proportion of rare variants
 maf_very_common = 0.1 #MAF of very common variants
 maf_common = 0.05 #MAF of common variants
 maf_rare = 0.005 #MAF of rare variants
-n_annot = 12 #number of annotations (predictor-level covariates)
+n_annot = 10 #number of annotations (predictor-level covariates)
 #annot_cover percentage of all variants will have annotation
 annot_cover = 0.05
 #annot_cover_risk percentage of risk variants covered by annotation
@@ -164,8 +164,7 @@ gen_riskvar_genotype = function (nm,n,case=FALSE,or,maf,beta0=0)
 }
 
 ################################MAIN#########################################
-#for (i in 1:n_replicate)
-i=1
+for (i in 1:n_replicate)
 {
     #we need prepare input for both pimsa and BVS
     #files for pimsa

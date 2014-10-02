@@ -26,12 +26,12 @@
     <sampling>
 	<use_endoprior>false</use_endoprior> <!--endo,annotation-->
 	<use_a>true</use_a>
-	<use_z>false</use_z>
+	<use_z>true</use_z>
 	<logistic>true</logistic>
 	<marginal_prior>false</marginal_prior>
 	<max_order>1</max_order>
 	<main_effect_pref>3</main_effect_pref>
 	<iterations>PIMSA_ITERATION</iterations>
-	<max_modelsize>100</max_modelsize>
+	<max_modelsize>20</max_modelsize>
     </sampling>
 </settings>

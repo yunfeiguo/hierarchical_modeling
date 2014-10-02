@@ -1,5 +1,5 @@
 sampleBVS2 = function(data,forced=NULL,inform=FALSE,cov=NULL,rare=FALSE,mult.regions=FALSE,regions=NULL,hap=FALSE,
-		     iter=10000,conver.thres=NULL,conver.count=1000,save.iter=0,outfile=NULL,status.file=NULL,old.results=NULL)
+		     iter=10000,conver.thres=NULL,conver.count=1000,save.iter=0,outfile=NULL,status.file=NULL,old.results=NULL,start=NULL)
 {
     library(MASS)
     library(msm)
@@ -73,6 +73,10 @@ sampleBVS2 = function(data,forced=NULL,inform=FALSE,cov=NULL,rare=FALSE,mult.reg
 	{
 	    a1.current = old.results$alpha[old.iter]
 	}
+    }
+    if(!is.null(start))
+    {
+	Z.current = start;
     }
 
     ##Calculate current fitness of initial parameters  
