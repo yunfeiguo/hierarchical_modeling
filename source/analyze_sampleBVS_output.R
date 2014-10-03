@@ -6,7 +6,7 @@ make_roc <- function(file="roc.pdf",names,data,outcome)
     auc.val = NULL
     for(i in 1:length(args))
     {
-	roc.obj = roc(outcome,data[i,])
+	roc.obj = roc(outcome,data[i,],na.rm=TRUE)
 	if(i == 1)
 	{
 	    plot(roc.obj,col=col[i])
@@ -34,6 +34,12 @@ if(length(args)>0)
 	file = args[i]
 	data = read.table(file,fill=TRUE,header=FALSE)
 	success.idx = data[,2]!="ERROR"
+	total = length(data[,2])
+	success =sum(success.idx) 
+	fail =sum(!success.idx) 
+	#For lines with ERROR, 3rd column and beyond are filled with blanks,
+	#we can convert the blanks into NAs to suppress warnings in as.numeric
+	data[!success.idx,3:dim(data)[2]]=NA
 
 	globalBF.idx = which(data[success.idx,][1,] == c('GLOBAL_BF'))
 	RBF.idx = which(data[success.idx,][1,] == c('REGIONAL_BF'))
@@ -43,15 +49,28 @@ if(length(args)>0)
 	globalBF.idx = globalBF.idx + 1
 	RBF.idx = (RBF.idx+1):(margBF.idx-1)
 	margBF.idx = (margBF.idx+1):(dim(data)[2])
-	print(str(globalBF))
-	print(str(as.numeric(data[success.idx,globalBF.idx])))
-	globalBF = rbind(globalBF,as.numeric(data[success.idx,globalBF.idx]))
-	RBF = rbind(RBF,apply(data[success.idx,RBF.idx],2,function(x){median(as.numeric(x))}))
-	margBF = rbind(margBF,apply(data[success.idx,margBF.idx],2,function(x){median(as.numeric(x))}))
 
-	total = length(data[,2])
-	success =sum(success.idx) 
-	fail =sum(!success.idx) 
+	#consider situation where we need to rbind vectors with different length
+	#if(!is.null(globalBF)) 
+	#{
+	#    if(dim(globalBF)[2]>success)
+	#    {
+	#	globalBF = rbind(globalBF[,1:success],as.numeric(data[success.idx,globalBF.idx]))
+	#    } else
+	#    {
+	#	globalBF = rbind(globalBF,as.numeric(data[success.idx,globalBF.idx])[1:dim(globalBF)[2]])
+	#    }
+	#} else
+	#{
+	#    globalBF = rbind(globalBF,as.numeric(data[success.idx,globalBF.idx]))
+	#}
+	#globalBF = rbind(globalBF,as.numeric(data[success.idx,globalBF.idx]))
+	#RBF = rbind(RBF,apply(data[success.idx,RBF.idx],2,function(x){median(as.numeric(x))}))
+	#margBF = rbind(margBF,apply(data[success.idx,margBF.idx],2,function(x){median(as.numeric(x))}))
+	globalBF = rbind(globalBF,as.numeric(data[,globalBF.idx]))
+	RBF = rbind(RBF,apply(data[,RBF.idx],2,function(x){median(as.numeric(x),na.rm=TRUE)}))
+	margBF = rbind(margBF,apply(data[,margBF.idx],2,function(x){median(as.numeric(x),na.rm=TRUE)}))
+
 
 	cat("File:",file,"\n")
 	cat("Total simulations:",total,"\n")
@@ -62,7 +81,7 @@ if(length(args)>0)
 	    if(dim(data)[2]>=6)
 	    {
 		n_hiBF = sum(apply(data[success.idx,RBF.idx],1,function(i){i=as.numeric(i);max(i)==i[1]}))
-		cat("Simulations with 1st region having highest BF:", n_hiBF,"(",100*n_hiBF/total,"%)\n")
+		cat("Successful simulations with 1st region having highest BF:", n_hiBF,"(",100*n_hiBF/success,"%)\n")
 		cat("Global BF:\n")
 		print(summary(as.numeric(data[success.idx,globalBF.idx])))
 		cat("BF1:\n")

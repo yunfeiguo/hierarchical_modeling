@@ -45,7 +45,7 @@ my $BVS_ITER = 100;
 my $BVS_BURNIN = 10;
 my $N_SIMULATION = 200;
 #############################MAIN#######################################
-#&sampleBVS1;
+&sampleBVS1;
 #&sampleBVS2;
 &sampleBVS3;
 ##############################SUBROUTINES###############################
@@ -63,8 +63,8 @@ sub sampleBVS1
 	$individual_result =~ s/1/$i/;
 
 	&prepare_source($BVS_COMMAND,$source,$i);
-	#&submit_job("$EXEC $tmpdir $source ".abs_path($individual_result)." $i $outfile"," -l h=\"compute-0-[10][0-9]\" -l h_vmem=4g -m ea -M guoyunfei1989\@gmail.com");
-	&submit_job("$EXEC $tmpdir $source ".abs_path($individual_result)." $i $outfile"," -l h=\"compute-0-[10][0-9]\" -l h_vmem=4g");
+	#&submit_job("$EXEC $tmpdir $source ".abs_path($individual_result)." $i $outfile"," -l h=\"compute-0-[1-2][0-9]\" -l h_vmem=4g -m ea -M guoyunfei1989\@gmail.com");
+	&submit_job("$EXEC $tmpdir $source ".abs_path($individual_result)." $i $outfile"," -l h=\"compute-0-[1-2][0-9]\" -l h_vmem=4g");
 	#warn("$EXEC $tmpdir $source ".abs_path($individual_result)." $i $outfile\n");
     }
     warn "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
@@ -93,8 +93,8 @@ sub sampleBVS3
 
 	&prepare_source($BVS_COMMAND_WITH_PIMSA,$source,$i);
 	&prepare_source($PIMSA_TEMPLATE,$pimsa_xml,$i);
-	#&submit_job("$EXEC $tmpdir $source ".abs_path($individual_result)." $i $outfile $PIMSA_EXE"," -l h=\"compute-0-[10][0-9]\" -l h_vmem=12g -m ea -M guoyunfei1989\@gmail.com");
-	&submit_job("$EXEC $tmpdir $source ".abs_path($individual_result)." $i $outfile $PIMSA_EXE"," -l h=\"compute-0-[10][0-9]\" -l h_vmem=12g");
+	#&submit_job("$EXEC $tmpdir $source ".abs_path($individual_result)." $i $outfile $PIMSA_EXE"," -l h=\"compute-0-[1-2][0-9]\" -l h_vmem=12g -m ea -M guoyunfei1989\@gmail.com");
+	&submit_job("$EXEC $tmpdir $source ".abs_path($individual_result)." $i $outfile $PIMSA_EXE"," -l h=\"compute-0-[1-2][0-9]\" -l h_vmem=12g");
 	#warn("$EXEC $tmpdir $source ".abs_path($individual_result)." $i $outfile $PIMSA_EXE\n");
     }
     warn "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
