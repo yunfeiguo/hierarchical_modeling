@@ -1,7 +1,8 @@
 ##########################PARAMETERS#############################
 #based on the study results from 202 genes sequencing in 14,002 samples
 #most variants are rare or private
-n_replicate = 5 #number of simulation data sets
+n_replicate = 200 #number of simulation data sets
+stopifnot(n_replicate %% 2 == 0) #half is associated, half is not
 n_case = 500 #number of cases
 n_ctrl = 500 #number of controls
 #n_var = 10000
@@ -20,9 +21,9 @@ annot_cover = 0.05
 annot_cover_risk = 0.8
 n_region = 10 #number of regions(genes/pathways)
 n_risk_region = 1 #number of regions associated with disease
-n_risk_very_common_var = 0 #number of very common risk variants
-n_risk_common_var = 0 #number of common risk variants
-n_risk_rare_var = 10 #number of rare risk variants
+n_risk_very_common_var_vec = rep(0,n_replicate) #number of very common risk variants
+n_risk_common_var_vec = rep(0,n_replicate) #number of common risk variants
+n_risk_rare_var_vec = c(rep(10,n_replicate/2),rep(0,n_replicate/2)) #number of rare risk variants
 or_very_common_var = 1.05 #OR of very common risk variants
 or_common_var = 1.2 #OR of common risk variants
 or_rare_var = 10 #OR of rare risk variants
@@ -132,6 +133,8 @@ invlogit = function (x)
 #beta0: constant in regression model
 gen_riskvar_genotype = function (nm,n,case=FALSE,or,maf,beta0=0)
 {
+    if(nm>0)
+    {
     #convert OR to logOR
     lor = rep(log(or),nm)[1:nm]
     beta0 = rep(beta0,nm)[1:nm]
@@ -161,11 +164,18 @@ gen_riskvar_genotype = function (nm,n,case=FALSE,or,maf,beta0=0)
 		    })
 	   )
 	   )
+    } else
+    {
+	return (NULL)
+    }
 }
 
 ################################MAIN#########################################
 for (i in 1:n_replicate)
 {
+    n_risk_rare_var = n_risk_rare_var_vec[i]
+    n_risk_common_var = n_risk_common_var_vec[i]
+    n_risk_very_common_var = n_risk_very_common_var_vec[i]
     #we need prepare input for both pimsa and BVS
     #files for pimsa
     #0=missing,1=homozygous wildtype,2=heterozygous,3=homozygous mutant
@@ -185,7 +195,13 @@ for (i in 1:n_replicate)
     #prepare data
     #put all risk variants at the end
     n_risk_var = n_risk_rare_var + n_risk_common_var + n_risk_very_common_var
-    idx.risk = (n_var-n_risk_var+1):(n_var)
+    if(n_risk_var>0)
+    {
+	idx.risk = (n_var-n_risk_var+1):(n_var)
+    } else
+    {
+	idx.risk = 0
+    }
     case.data = matrix(NA,nrow=n_case,ncol=n_var+1)
     ctrl.data = matrix(NA,nrow=n_ctrl,ncol=n_var+1)
     case.data[,1] = 1
@@ -214,7 +230,7 @@ for (i in 1:n_replicate)
     #p-dimesional vector identifying region for p variants
     region.level = paste("pathway",1:n_region,sep="")
     region.data = rep(NA,n_var)
-    region.data[-idx.risk] = region.level
+    region.data = rep(region.level,ceiling(n_var/n_region))[1:n_var]
     #put all risk variants into region 1
     region.data[idx.risk] = region.level[1]
 

@@ -43,9 +43,11 @@ if(length(args)>0)
 	globalBF.idx = globalBF.idx + 1
 	RBF.idx = (RBF.idx+1):(margBF.idx-1)
 	margBF.idx = (margBF.idx+1):(dim(data)[2])
-	globalBF = rbind(globalBF,data[success.idx,globalBF.idx])
-	RBF = rbind(RBF,apply(data[success.idx,RBF.idx],2,median))
-	margBF = rbind(margBF,apply(data[success.idx,margBF.idx],2,median))
+	print(str(globalBF))
+	print(str(as.numeric(data[success.idx,globalBF.idx])))
+	globalBF = rbind(globalBF,as.numeric(data[success.idx,globalBF.idx]))
+	RBF = rbind(RBF,apply(data[success.idx,RBF.idx],2,function(x){median(as.numeric(x))}))
+	margBF = rbind(margBF,apply(data[success.idx,margBF.idx],2,function(x){median(as.numeric(x))}))
 
 	total = length(data[,2])
 	success =sum(success.idx) 
@@ -62,9 +64,9 @@ if(length(args)>0)
 		n_hiBF = sum(apply(data[success.idx,RBF.idx],1,function(i){i=as.numeric(i);max(i)==i[1]}))
 		cat("Simulations with 1st region having highest BF:", n_hiBF,"(",100*n_hiBF/total,"%)\n")
 		cat("Global BF:\n")
-		print(summary(data[success.idx,globalBF.idx]))
+		print(summary(as.numeric(data[success.idx,globalBF.idx])))
 		cat("BF1:\n")
-		print(summary(data[success.idx,RBF.idx][,1]))
+		print(summary(as.numeric(data[success.idx,RBF.idx][,1])))
 	    }
 	}
     }
@@ -72,8 +74,8 @@ if(length(args)>0)
     #plot ROC reports
     col = rainbow(length(args))
     #globalBF, assume first half is associated, second half is not
-    #stopifnot(dim(globalBF)[2] % 2 == 0)
-    #make_roc(file="globalBF_ROC.pdf",names=args,data=globalBF,outcome=c(rep(1,dim(globalBF)[2]/2),rep(0,dim(globalBF)[2]/2)))
+    stopifnot(dim(globalBF)[2] %% 2 == 0)
+    make_roc(file="globalBF_ROC.pdf",names=args,data=globalBF,outcome=c(rep(1,dim(globalBF)[2]/2),rep(0,dim(globalBF)[2]/2)))
     #RBF(assume 1st region is always associated risk, no other region is associated with risk)
     make_roc(file="RBF_ROC.pdf",names=args,data=RBF,outcome=c(1,rep(0,dim(RBF)[2]-1)))
     #marginal BF (each variant), assume only last 10 variants are risk variants

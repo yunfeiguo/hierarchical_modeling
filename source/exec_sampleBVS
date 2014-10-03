@@ -39,7 +39,11 @@ sub write_result
 	#format of input (single line)
 	#GlobalBF BF1 BF2 ...
 	open IN,'<',$data_file or die "Failed to read $data_file: $!\n";
-	my @data = <IN>;
+	my @data;
+	while(<IN>)
+	{
+	    push @data,$_;
+	}
 	chomp @data;
 	close IN;
 	#always append to result

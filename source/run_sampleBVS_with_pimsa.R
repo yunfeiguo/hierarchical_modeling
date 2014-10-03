@@ -19,5 +19,9 @@ if(start_snp[1,2] != '-1')
 }
 result=sampleBVS2(start=start_model,cov=cov,inform=TRUE,mult.regions=TRUE,regions=region,iter=BVS_ITERATION,data=data,rare=TRUE,status.file="/dev/null")
 summary.result = summaryBVS(result,data,rare=TRUE,mult.regions=TRUE,cov=cov,regions=region,inform=TRUE,burnin=BVS_BURNIN)
-write(paste(summary.result$Global,paste(summary.result$Marg.RBF,collapse=" "),sep=" "),
-      "bvs.result.simulation1.txt")
+write(summary.result$Global,
+      "bvs.sampleBVSTWO_with_pimsa.result.simulation1.txt")
+write(paste(summary.result$Marg.RBF,collapse=" "),
+      append=TRUE,"bvs.sampleBVSTWO_with_pimsa.result.simulation1.txt")
+write(paste(summary.result$MargBF,collapse=" "),
+      append=TRUE,"bvs.sampleBVSTWO_with_pimsa.result.simulation1.txt")
