@@ -36,14 +36,14 @@ pimsa.z_matrix.simulation1.txt
 /;
 my @PIMSA_OUTPUT = qw/models.out betas.out/;
 ##########################TUNING PARAMETERS############################### 
-#my $PIMSA_ITER = 50_000;
-#my $BVS_ITER = 10_000;
-#my $BVS_BURNIN = 1_000;
-#my $N_SIMULATION = 200;
-my $PIMSA_ITER = 5000;
-my $BVS_ITER = 100;
-my $BVS_BURNIN = 10;
+my $PIMSA_ITER = 50_000;
+my $BVS_ITER = 10_000;
+my $BVS_BURNIN = 1_000;
 my $N_SIMULATION = 200;
+#my $PIMSA_ITER = 5000;
+#my $BVS_ITER = 100;
+#my $BVS_BURNIN = 10;
+#my $N_SIMULATION = 200;
 #############################MAIN#######################################
 &sampleBVS1;
 #&sampleBVS2;

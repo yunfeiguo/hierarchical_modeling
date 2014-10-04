@@ -1,6 +1,6 @@
 require('pROC')
 ##########################SUBROUTINES###################################
-make_roc <- function(file="roc.pdf",names,data,outcome)
+make_roc <- function(file="roc.pdf",names,data,outcome,...)
 {
     pdf(file)
     auc.val = NULL
@@ -33,6 +33,8 @@ if(length(args)>0)
 	#N	TIME	GLOBAL_BF	10	REGIONAL_BF	BF1	BF2...	MARGINAL_BF	BF1	BF2...
 	file = args[i]
 	data = read.table(file,fill=TRUE,header=FALSE)
+	#rearrange based on simulation number
+	data = data[order(data[,1]),]
 	success.idx = data[,2]!="ERROR"
 	total = length(data[,2])
 	success =sum(success.idx) 
@@ -49,27 +51,19 @@ if(length(args)>0)
 	globalBF.idx = globalBF.idx + 1
 	RBF.idx = (RBF.idx+1):(margBF.idx-1)
 	margBF.idx = (margBF.idx+1):(dim(data)[2])
+	#choose the model with median globalBF for evaluating RBF and margBF
+	idx.median_globalBF = 0
+	if(length(data[,globalBF.idx]) %% 2 == 0)
+	{
+	    idx.median_globalBF = order(data[,globalBF.idx])[length(data[,globalBF.idx])/2]
+	} else
+	{
+	    idx.median_globalBF = order(data[,globalBF.idx])[floor(length(data[,globalBF.idx])/2)]
+	}
 
-	#consider situation where we need to rbind vectors with different length
-	#if(!is.null(globalBF)) 
-	#{
-	#    if(dim(globalBF)[2]>success)
-	#    {
-	#	globalBF = rbind(globalBF[,1:success],as.numeric(data[success.idx,globalBF.idx]))
-	#    } else
-	#    {
-	#	globalBF = rbind(globalBF,as.numeric(data[success.idx,globalBF.idx])[1:dim(globalBF)[2]])
-	#    }
-	#} else
-	#{
-	#    globalBF = rbind(globalBF,as.numeric(data[success.idx,globalBF.idx]))
-	#}
-	#globalBF = rbind(globalBF,as.numeric(data[success.idx,globalBF.idx]))
-	#RBF = rbind(RBF,apply(data[success.idx,RBF.idx],2,function(x){median(as.numeric(x))}))
-	#margBF = rbind(margBF,apply(data[success.idx,margBF.idx],2,function(x){median(as.numeric(x))}))
 	globalBF = rbind(globalBF,as.numeric(data[,globalBF.idx]))
-	RBF = rbind(RBF,apply(data[,RBF.idx],2,function(x){median(as.numeric(x),na.rm=TRUE)}))
-	margBF = rbind(margBF,apply(data[,margBF.idx],2,function(x){median(as.numeric(x),na.rm=TRUE)}))
+	RBF = rbind(RBF,as.numeric(data[idx.median_globalBF,RBF.idx]))
+	margBF = rbind(margBF,as.numeric(data[idx.median_globalBF,margBF.idx]))
 
 
 	cat("File:",file,"\n")
@@ -94,10 +88,12 @@ if(length(args)>0)
     col = rainbow(length(args))
     #globalBF, assume first half is associated, second half is not
     stopifnot(dim(globalBF)[2] %% 2 == 0)
-    make_roc(file="globalBF_ROC.pdf",names=args,data=globalBF,outcome=c(rep(1,dim(globalBF)[2]/2),rep(0,dim(globalBF)[2]/2)))
+    make_roc(file="globalBF_ROC.pdf",names=args,data=globalBF,outcome=c(rep(1,dim(globalBF)[2]/2),rep(0,dim(globalBF)[2]/2)),col)
     #RBF(assume 1st region is always associated risk, no other region is associated with risk)
-    make_roc(file="RBF_ROC.pdf",names=args,data=RBF,outcome=c(1,rep(0,dim(RBF)[2]-1)))
+    print(RBF)
+    make_roc(file="RBF_ROC.pdf",names=args,data=RBF,outcome=c(1,rep(0,dim(RBF)[2]-1)),col)
     #marginal BF (each variant), assume only last 10 variants are risk variants
     stopifnot(dim(margBF)[2]>=10)
-    make_roc(file="margBF_ROC.pdf",names=args,data=margBF,outcome=c(rep(0,dim(margBF)[2]-10),rep(1,10)))
+    print(margBF)
+    make_roc(file="margBF_ROC.pdf",names=args,data=margBF,outcome=c(rep(0,dim(margBF)[2]-10),rep(1,10)),col)
 }
