@@ -1,12 +1,11 @@
 ##########################PARAMETERS#############################
 #based on the study results from 202 genes sequencing in 14,002 samples
 #most variants are rare or private
-n_replicate = 200 #number of simulation data sets
+n_replicate = 100 #number of simulation data sets
 stopifnot(n_replicate %% 2 == 0) #half is associated, half is not
 n_case = 500 #number of cases
 n_ctrl = 500 #number of controls
-#n_var = 10000
-n_var = 1000 #total number of variants
+n_var = 2000 #total number of variants
 prop_very_common = 0 #proportion of very common variants
 prop_common = 0 #proportion of common variants
 #proportion of rare variants in all variants
@@ -19,11 +18,11 @@ n_annot = 10 #number of annotations (predictor-level covariates)
 annot_cover = 0.05
 #annot_cover_risk percentage of risk variants covered by annotation
 annot_cover_risk = 0.8
-n_region = 10 #number of regions(genes/pathways)
-n_risk_region = 1 #number of regions associated with disease
+n_region = 20 #number of regions(genes/pathways)
+n_risk_region = 5 #number of regions associated with disease
 n_risk_very_common_var_vec = rep(0,n_replicate) #number of very common risk variants
 n_risk_common_var_vec = rep(0,n_replicate) #number of common risk variants
-n_risk_rare_var_vec = c(rep(10,n_replicate/2),rep(0,n_replicate/2)) #number of rare risk variants
+n_risk_rare_var_vec = c(rep(20,n_replicate/2),rep(0,n_replicate/2)) #number of rare risk variants
 or_very_common_var = 1.05 #OR of very common risk variants
 or_common_var = 1.2 #OR of common risk variants
 or_rare_var = 10 #OR of rare risk variants
@@ -231,8 +230,8 @@ for (i in 1:n_replicate)
     region.level = paste("pathway",1:n_region,sep="")
     region.data = rep(NA,n_var)
     region.data = rep(region.level,ceiling(n_var/n_region))[1:n_var]
-    #put all risk variants into region 1
-    region.data[idx.risk] = region.level[1]
+    #put all risk variants (randomly) into region 1:n_risk_region
+    region.data[idx.risk] = region.level[sample(1:n_risk_region,length(idx.risk),replace=TRUE)]
 
 
     ###############output data for pimsa######################

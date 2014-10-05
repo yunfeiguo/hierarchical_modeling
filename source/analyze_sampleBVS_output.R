@@ -33,6 +33,9 @@ if(length(args)>0)
 	#N	TIME	GLOBAL_BF	10	REGIONAL_BF	BF1	BF2...	MARGINAL_BF	BF1	BF2...
 	file = args[i]
 	data = read.table(file,fill=TRUE,header=FALSE)
+	#make sure we got equal risk-containing and risk-free data sets
+	#a lot code depends on this spec!!!!
+        stopifnot(dim(data)[1] %% 2 == 0)
 	#rearrange based on simulation number
 	data = data[order(data[,1]),]
 	success.idx = data[,2]!="ERROR"
@@ -52,18 +55,21 @@ if(length(args)>0)
 	RBF.idx = (RBF.idx+1):(margBF.idx-1)
 	margBF.idx = (margBF.idx+1):(dim(data)[2])
 	#choose the model with median globalBF for evaluating RBF and margBF
-	idx.median_globalBF = 0
-	if(length(data[,globalBF.idx]) %% 2 == 0)
-	{
-	    idx.median_globalBF = order(data[,globalBF.idx])[length(data[,globalBF.idx])/2]
-	} else
-	{
-	    idx.median_globalBF = order(data[,globalBF.idx])[floor(length(data[,globalBF.idx])/2)]
-	}
+	idx.median_globalBF_risk = 0
+	idx.median_globalBF_norisk = 0
+	#by default, all NAs will appear at end in order()'s result
+	#so we don't have to worry about them if we only choose the midpoint
+	idx.median_globalBF_risk = order(data[1:(dim(data)[1]/2),globalBF.idx])[floor(dim(data)[1]/4)]
+	idx.median_globalBF_norisk = dim(data)[1]/2+order(data[(dim(data)[1]/2+1):dim(data)[1],globalBF.idx])[floor(dim(data)[1]/4)]
 
 	globalBF = rbind(globalBF,as.numeric(data[,globalBF.idx]))
-	RBF = rbind(RBF,as.numeric(data[idx.median_globalBF,RBF.idx]))
-	margBF = rbind(margBF,as.numeric(data[idx.median_globalBF,margBF.idx]))
+	#same situation as margBF
+	RBF = rbind(RBF,as.numeric(c(data[idx.median_globalBF_risk,RBF.idx],data[idx.median_globalBF_norisk,RBF.idx])))
+	#data has been ordered, the first half contains no risk variants, the second half does
+	#therefore we would have to construct a vector with length equal to twice
+	#the number of variants, with first half from data sets containing risk variants
+	#2nd half not
+	margBF = rbind(margBF,as.numeric(c(data[idx.median_globalBF_risk,margBF.idx],data[idx.median_globalBF_norisk,margBF.idx])))
 
 
 	cat("File:",file,"\n")
@@ -86,14 +92,14 @@ if(length(args)>0)
 
     #plot ROC reports
     col = rainbow(length(args))
+    n_risk_region = 5
+    n_risk_var = 20
     #globalBF, assume first half is associated, second half is not
     stopifnot(dim(globalBF)[2] %% 2 == 0)
     make_roc(file="globalBF_ROC.pdf",names=args,data=globalBF,outcome=c(rep(1,dim(globalBF)[2]/2),rep(0,dim(globalBF)[2]/2)),col)
     #RBF(assume 1st region is always associated risk, no other region is associated with risk)
-    print(RBF)
-    make_roc(file="RBF_ROC.pdf",names=args,data=RBF,outcome=c(1,rep(0,dim(RBF)[2]-1)),col)
+    make_roc(file="RBF_ROC.pdf",names=args,data=RBF,outcome=c(rep(1,n_risk_region),rep(0,dim(RBF)[2]/2-n_risk_region),rep(0,dim(RBF)[2]/2)),col)
     #marginal BF (each variant), assume only last 10 variants are risk variants
     stopifnot(dim(margBF)[2]>=10)
-    print(margBF)
-    make_roc(file="margBF_ROC.pdf",names=args,data=margBF,outcome=c(rep(0,dim(margBF)[2]-10),rep(1,10)),col)
+    make_roc(file="margBF_ROC.pdf",names=args,data=margBF,outcome=c(rep(0,dim(margBF)[2]/2-n_risk_var),rep(1,n_risk_var),rep(0,dim(margBF)[2]/2)),col)
 }
