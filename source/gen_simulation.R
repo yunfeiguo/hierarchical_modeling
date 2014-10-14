@@ -5,7 +5,7 @@ n_replicate = 100 #number of simulation data sets
 stopifnot(n_replicate %% 2 == 0) #half is associated, half is not
 n_case = 500 #number of cases
 n_ctrl = 500 #number of controls
-n_var = 2000 #total number of variants
+n_var = 10000 #total number of variants
 prop_very_common = 0 #proportion of very common variants
 prop_common = 0 #proportion of common variants
 #proportion of rare variants in all variants

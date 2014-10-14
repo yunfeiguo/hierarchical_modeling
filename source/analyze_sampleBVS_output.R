@@ -20,11 +20,24 @@ make_roc <- function(file="roc.pdf",names,data,outcome,...)
 	   col=col, lwd=2)
     dev.off()
 }
+make_boxplot = function(file,names,data,...)
+{
+    pdf(file)
+    op <- par(no.readonly = TRUE)
+    transform.data = data.frame(group=rep(args,(lapply(data,length))),outcome=as.numeric(unlist(data)))
+    for(i in 1:length(args))
+    {
+	boxplot(outcome~group,transform.data,xlab='Group',ylab='Outcome')
+    }
+    par(op)
+    dev.off()
+}
 ########################MAIN#############################################
 args <- commandArgs(TRUE)
 globalBF=NULL
 RBF=NULL
 margBF=NULL
+data.time=list()
 if(length(args)>0)
 {
     for (i in 1:length(args))
@@ -35,7 +48,7 @@ if(length(args)>0)
 	data = read.table(file,fill=TRUE,header=FALSE)
 	#make sure we got equal risk-containing and risk-free data sets
 	#a lot code depends on this spec!!!!
-        stopifnot(dim(data)[1] %% 2 == 0)
+	stopifnot(dim(data)[1] %% 2 == 0)
 	#rearrange based on simulation number
 	data = data[order(data[,1]),]
 	success.idx = data[,2]!="ERROR"
@@ -45,6 +58,9 @@ if(length(args)>0)
 	#For lines with ERROR, 3rd column and beyond are filled with blanks,
 	#we can convert the blanks into NAs to suppress warnings in as.numeric
 	data[!success.idx,3:dim(data)[2]]=NA
+
+	#consider situation where we have unequal lengths
+	data.time[[args[i]]] = data[success.idx,][,2]
 
 	globalBF.idx = which(data[success.idx,][1,] == c('GLOBAL_BF'))
 	RBF.idx = which(data[success.idx,][1,] == c('REGIONAL_BF'))
@@ -102,4 +118,6 @@ if(length(args)>0)
     #marginal BF (each variant), assume only last 10 variants are risk variants
     stopifnot(dim(margBF)[2]>=10)
     make_roc(file="margBF_ROC.pdf",names=args,data=margBF,outcome=c(rep(0,dim(margBF)[2]/2-n_risk_var),rep(1,n_risk_var),rep(0,dim(margBF)[2]/2)),col)
+    #draw time boxplot for comparison
+    make_boxplot(file="boxplot.pdf",names=args,data=data.time)
 }
