@@ -44,11 +44,11 @@ my $BVS_ITER = 20_000;
 my $BVS_BURNIN = 2_000;
 my $N_SIMULATION = 100;
 #my $PIMSA_ITER = 50;
-#my $BVS_ITER = 1000;
+#my $BVS_ITER = 10;
 #my $BVS_BURNIN = 1;
 #my $N_SIMULATION = 2;
 #############################MAIN#######################################
-#&sampleBVS1;
+&sampleBVS1;
 #&sampleBVS2;
 &sampleBVS3;
 &sampleBVS4;
@@ -69,10 +69,10 @@ sub sampleBVS1
 	&prepare_source($BVS_COMMAND,$source,$i);
 	if($i == 1 or $i == $N_SIMULATION)
 	{
-	    &submit_job("$EXEC $tmpdir $source ".abs_path($individual_result)." $i $outfile"," -l h=\"compute-0-1[0-9]\" -l h_vmem=4g -m ea -M guoyunfei1989\@gmail.com");
+	    &submit_job("$EXEC $tmpdir $source ".abs_path($individual_result)." $i $outfile"," -l h=\"compute-0-[12][0-9]\" -l h_vmem=4g -m ea -M guoyunfei1989\@gmail.com");
 	} else
 	{
-	    &submit_job("$EXEC $tmpdir $source ".abs_path($individual_result)." $i $outfile"," -l h=\"compute-0-1[0-9]\" -l h_vmem=4g");
+	    &submit_job("$EXEC $tmpdir $source ".abs_path($individual_result)." $i $outfile"," -l h=\"compute-0-[12][0-9]\" -l h_vmem=4g");
 	}
 	#warn("$EXEC $tmpdir $source ".abs_path($individual_result)." $i $outfile\n");
     }
@@ -104,10 +104,10 @@ sub sampleBVS3
 	&prepare_source($PIMSA_TEMPLATE,$pimsa_xml,$i);
 	if($i == 1 or $i == $N_SIMULATION)
 	{
-	    &submit_job("$EXEC $tmpdir $source ".abs_path($individual_result)." $i $outfile $PIMSA_EXE"," -l h=\"compute-0-1[0-9]\" -l h_vmem=8g -m ea -M guoyunfei1989\@gmail.com");
+	    &submit_job("$EXEC $tmpdir $source ".abs_path($individual_result)." $i $outfile $PIMSA_EXE"," -l h=\"compute-0-[12][0-9]\" -l h_vmem=8g -m ea -M guoyunfei1989\@gmail.com");
 	} else
 	{
-	    &submit_job("$EXEC $tmpdir $source ".abs_path($individual_result)." $i $outfile $PIMSA_EXE"," -l h=\"compute-0-1[0-9]\" -l h_vmem=8g");
+	    &submit_job("$EXEC $tmpdir $source ".abs_path($individual_result)." $i $outfile $PIMSA_EXE"," -l h=\"compute-0-[21][0-9]\" -l h_vmem=8g");
 	}
 	#warn("$EXEC $tmpdir $source ".abs_path($individual_result)." $i $outfile $PIMSA_EXE\n");
     }
@@ -132,10 +132,10 @@ sub sampleBVS4
 	&prepare_source($BVS_COMMAND_NOANNO,$source,$i);
 	if($i == 1 or $i == $N_SIMULATION)
 	{
-	    &submit_job("$EXEC $tmpdir $source ".abs_path($individual_result)." $i $outfile"," -l h=\"compute-0-1[0-9]\" -l h_vmem=4g -m ea -M guoyunfei1989\@gmail.com");
+	    &submit_job("$EXEC $tmpdir $source ".abs_path($individual_result)." $i $outfile"," -l h=\"compute-0-[21][0-9]\" -l h_vmem=4g -m ea -M guoyunfei1989\@gmail.com");
 	} else
 	{
-	    &submit_job("$EXEC $tmpdir $source ".abs_path($individual_result)." $i $outfile"," -l h=\"compute-0-1[0-9]\" -l h_vmem=4g");
+	    &submit_job("$EXEC $tmpdir $source ".abs_path($individual_result)." $i $outfile"," -l h=\"compute-0-[21][0-9]\" -l h_vmem=4g");
 	}
 	#warn("$EXEC $tmpdir $source ".abs_path($individual_result)." $i $outfile\n");
     }

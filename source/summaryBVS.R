@@ -167,19 +167,21 @@ summaryBVS = function(BVS.out,data=data,forced=NULL,cov=NULL,burnin=1000,regions
 	which.r = NULL
 	Region.marg.BF = NULL
 	Region.post.inc = NULL
-	if(length(regions)>0){
-		regions = as.factor(regions)
-		u.regions = levels(regions)
-		which.regions = model.matrix(~regions-1)
-		which.r <- u.which %*% which.regions
-        colnames(which.r) = u.regions
-        probne0.r <- as.numeric((PrMgivenD * 10000) %*% (which.r > 0)) / 10000
-        probe0.r <- as.numeric((PrMgivenD * 10000) %*% (which.r == 0)) / 10000
-        NullPrior.marg.r <- (1 - NullPrior.marg)^apply(which.regions, 2, sum)
-        Region.post.inc = probne0.r
-        Region.marg.BF <- log(probne0.r) - log(probe0.r) - log(1 - NullPrior.marg.r) + log(NullPrior.marg.r)
-        Region.marg.BF = exp(Region.marg.BF)
-		}
+	if(length(regions)>0)
+	{
+	    regions = as.factor(regions)
+	    u.regions = levels(regions)
+	    which.regions = model.matrix(~regions-1)
+	    which.r <- u.which %*% which.regions
+	    colnames(which.r) = u.regions
+	    probne0.r <- as.numeric((PrMgivenD * 10000) %*% (which.r > 0)) / 10000
+	    names(probne0.r) <- u.regions
+	    probe0.r <- as.numeric((PrMgivenD * 10000) %*% (which.r == 0)) / 10000
+	    NullPrior.marg.r <- (1 - NullPrior.marg)^apply(which.regions, 2, sum)
+	    Region.post.inc = probne0.r
+	    Region.marg.BF <- log(probne0.r) - log(probe0.r) - log(1 - NullPrior.marg.r) + log(NullPrior.marg.r)
+	    Region.marg.BF = exp(Region.marg.BF)
+	}
 	
 	##Posterior estimates of coefficients and sd
 	post.coef=NULL
@@ -190,7 +192,7 @@ summaryBVS = function(BVS.out,data=data,forced=NULL,cov=NULL,burnin=1000,regions
     
 
 	##Save Results
-	results=list(Global.BF,exp(Global.marg.BF),Region.marg.BF,post.alpha,post.coef,which,which.r,u.coef)
-	names(results)=c("Global","MargBF","Marg.RBF","PostAlpha","PostCoef","Which","Which.r","Coef")  
+	results=list(Global.BF,exp(Global.marg.BF),Region.marg.BF,post.alpha,post.coef,which,which.r,u.coef,Post.alt,probne0.r,Post.marg)
+	names(results)=c("Global","MargBF","Marg.RBF","PostAlpha","PostCoef","Which","Which.r","Coef","PostGlobal","PostRegion","PostMarg")  
     return(results)
 	}

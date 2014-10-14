@@ -51,7 +51,10 @@ sub write_result
 	&lock(\*OUT);
 	print OUT "$n\t$time\tGLOBAL_BF\t$data[0]\t"; #n, time, global BF
 	print OUT join("\t","REGIONAL_BF",(split " ",$data[1])),"\t"; #count and values of regional BF
-	print OUT join("\t","MARGINAL_BF",(split " ",$data[2])); #count and values of variant BF
+	print OUT join("\t","MARGINAL_BF",(split " ",$data[2])),"\t"; #count and values of variant BF
+	print OUT join("\t","GLOBAL_POSTERIOR",(split " ",$data[3])),"\t"; #count and values of variant BF
+	print OUT join("\t","REGIONAL_POSTERIOR",(split " ",$data[4])),"\t"; #count and values of variant BF
+	print OUT join("\t","MARGINAL_POSTERIOR",(split " ",$data[5])); #count and values of variant BF
 	print OUT "\n";
 	&unlock(\*OUT);
 	close OUT;
